@@ -1,7 +1,7 @@
 // js/script_cesium.js
 
 // --- Configuración del Token de Cesium Ion ---
-Cesium.Ion.defaultAccessToken = ''; // ¡¡¡REEMPLAZA CON TU TOKEN!!!
+Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI0NDRkNWVhNy0zZDUzLTRhMjctODM2Yy1mOGRiMjQwMzllNzEiLCJpZCI6MzAxNTU3LCJpYXQiOjE3NDcwMTE4MDF9.yJhtoi6X8NYz8YGp_79DMymdNxXpt7UIbQet3bwUNSY'; // ¡¡¡REEMPLAZA CON TU TOKEN!!!
 
 // --- Constantes Globales ---
 const geoServerWorkspace = 'SGG'; // Tu workspace de GeoServer
