@@ -5,7 +5,7 @@ Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOi
 
 // --- Constantes Globales ---
 const geoServerWorkspace = 'SGG'; // Tu workspace de GeoServer
-const geoServerWmsUrl = `http://34.1.18.12:8080//geoserver/${geoServerWorkspace}/wms`; // URL para WMS
+const geoServerWmsUrl = `https://geo.sggproject.me/geoserver/${geoServerWorkspace}/wms`; // URL para WMS
 // const geoServerOwsUrl = 'http://localhost:8080/geoserver/ows'; // Si necesitas la base OWS para algo más
 // const geoServerWfsUrl = `http://localhost:8080/geoserver/${geoServerWorkspace}/ows`; // Para WFS
 
