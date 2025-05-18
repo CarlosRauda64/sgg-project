@@ -41,9 +41,9 @@ const cesiumLayersConfig = {
     distrito:       { name: `${geoServerWorkspace}:distrito`,       title: 'Distritos',         imageryLayer: null, toggleId: 'toggleDistrito',     filterField: 'adm3_es', currentFilter: "INCLUDE", type: 'vector', legend: false, zIndex: 12 },
     cuerposAgua:    { name: `${geoServerWorkspace}:cuerposAgua`,    title: 'Cuerpos de Agua',   imageryLayer: null, toggleId: 'toggleCuerpos',      currentFilter: "INCLUDE", type: 'vector', legend: true,  zIndex: 13 },
     deburga:        { name: `${geoServerWorkspace}:deburga`,        title: 'DEGURBA',           imageryLayer: null, toggleId: 'toggleDeburga',      filterField: 'class',   currentFilter: "INCLUDE", type: 'vector', legend: true,  zIndex: 14 },
-    construcciones: { name: `${geoServerWorkspace}:construcciones`, title: 'Construcciones',    imageryLayer: null, toggleId: 'toggleConstrucciones',currentFilter: "INCLUDE", type: 'vector', legend: false, zIndex: 15 },
-    rios:           { name: `${geoServerWorkspace}:rios`,           title: 'Ríos',              imageryLayer: null, toggleId: 'toggleRios',         currentFilter: "INCLUDE", type: 'vector', legend: true,  zIndex: 16 },
-    carreteras:     { name: `${geoServerWorkspace}:carreteras`,     title: 'Carreteras',        imageryLayer: null, toggleId: 'toggleCarreteras',   currentFilter: "INCLUDE", type: 'vector', legend: false, zIndex: 17 }
+    construcciones: { name: `${geoServerWorkspace}:construcciones`, title: 'Construcciones',    imageryLayer: null, toggleId: 'toggleConstrucciones',currentFilter: "INCLUDE", type: 'vector', legend: false, zIndex: 15  },
+    rios:           { name: `${geoServerWorkspace}:rios`,           title: 'Ríos',              imageryLayer: null, toggleId: 'toggleRios',         currentFilter: "INCLUDE", type: 'vector', legend: true,  zIndex: 16, pickable: false },
+    carreteras:     { name: `${geoServerWorkspace}:carreteras`,     title: 'Carreteras',        imageryLayer: null, toggleId: 'toggleCarreteras',   currentFilter: "INCLUDE", type: 'vector', legend: false, zIndex: 17, pickable: false }
 };
 
 let viewer; // Variable global para el visor de Cesium

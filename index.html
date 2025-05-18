@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
     <style>
+        /* --- ESTILOS GENERALES (los que ya tenías) --- */
         html,
         body {
             height: 100%;
@@ -41,7 +42,7 @@
             display: flex;
             flex-direction: column;
             height: calc(100vh - 2.5rem);
-            z-index: 100;
+            z-index: 1000;
         }
 
         .map-area {
@@ -81,7 +82,7 @@
             flex-wrap: wrap;
             align-items: center;
             gap: 0.5rem;
-            z-index: 90;
+            z-index: 990;
         }
 
         #filter-bar select {
@@ -106,7 +107,6 @@
             padding: 0.125rem 0.25rem;
             margin-left: 0.5rem;
             display: none;
-            /* Oculto por defecto */
             line-height: 1;
         }
 
@@ -122,45 +122,24 @@
             font-size: 0.875rem;
         }
 
-        /* Estilos para el contenedor de leyenda individual */
         .individual-legend-content {
             display: none;
             padding: 0.375rem;
-            /* Un padding pequeño (equivale a p-1.5 de Tailwind aprox) */
             margin-top: 0.25rem;
-            /* mt-1 */
             background-color: #374151;
-            /* Un poco más oscuro que el fondo del topbar */
             border-radius: 0.25rem;
-            /* rounded-sm */
-
-            /* --- AJUSTE PRINCIPAL AQUÍ --- */
             max-height: 150px;
-            /* Altura MÁXIMA para el contenedor. AJUSTA ESTO. */
             overflow-y: auto;
-            /* Scroll si el contenido (la imagen) es más alto */
             text-align: center;
-            /* Centrar la imagen si es más estrecha */
         }
 
         .individual-legend-content img {
             max-width: 100%;
-            /* La imagen no será más ancha que su contenedor */
-
-            /* --- AJUSTE PRINCIPAL AQUÍ --- */
             max-height: 100%;
-            /* La imagen puede ocupar hasta el 100% de la altura de su contenedor (que ya tiene max-height) */
-            /* O puedes poner un valor fijo un poco menor que el max-height del contenedor: ej. max-height: 130px; */
-
             object-fit: contain;
-            /* Escala la imagen para que quepa DENTRO del contenedor manteniendo proporciones. */
-            /* 'scale-down' también es una opción, se comporta como 'contain' o 'none' (lo que resulte en imagen más pequeña) */
-
             display: inline-block;
-            /* Para que el text-align:center del padre funcione */
             background-color: #ffffff;
             border-radius: 0.125rem;
-            /* No es necesario padding o borde en la imagen misma si el contenedor ya lo maneja o si quieres look limpio */
         }
 
         .custom-scrollbar::-webkit-scrollbar {
@@ -187,10 +166,111 @@
             scrollbar-color: #5b7a9d #2c3e50;
         }
 
-        .cesium-viewer-toolbar,
+        /* --- ESTILOS PARA WIDGETS DE CESIUM Y EL INFOBOX --- */
+        .cesium-viewer-toolbar {
+            /* Contenedor de los botones de la esquina superior derecha */
+            top: 20px !important;
+            /* Mueve un poco hacia abajo los botones de Cesium */
+            right: 15px !important;
+            z-index: 1001 !important;
+            /* Asegurar que los botones de Cesium estén encima del InfoBox si es necesario */
+        }
+
         .cesium-viewer-animationContainer,
         .cesium-viewer-timelineContainer {
             z-index: 101 !important;
+        }
+
+        .cesium-infoBox {
+            /* Posición y tamaño */
+            /* Ajustamos 'top' para que esté debajo de .cesium-viewer-toolbar */
+            /* La altura de la toolbar de Cesium es aprox 32px-40px + el 'top' que le demos. */
+            /* Si .cesium-viewer-toolbar tiene top: 20px y una altura de 32px, necesitamos que el InfoBox empiece después de 20+32 = 52px */
+            top: 65px !important;
+            /* AUMENTADO: Distancia desde arriba. (20px para toolbar + ~40px altura toolbar + 5px margen) */
+            right: 20px !important;
+            width: 320px !important;
+            /* La max-height se calculará para no chocar con la parte inferior si es necesario */
+            max-height: calc(100vh - 65px - 20px - 50px);
+            /* top - bottom_margin - cesium_timeline_approx_height */
+
+            /* Apariencia (como la tenías) */
+            background: #2c3e50 !important;
+            border: 1px solid #4b5563 !important;
+            border-radius: 0.5rem !important;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2), 0 4px 6px -2px rgba(0, 0, 0, 0.1) !important;
+            color: white !important;
+            z-index: 999 !important;
+            /* Debajo de la toolbar de Cesium y topbar, pero encima del mapa */
+        }
+
+        .cesium-infoBox-title {
+            background-color: #374151 !important;
+            color: #e5e7eb !important;
+            padding: 0.6rem 0.75rem !important;
+            font-size: 0.95rem !important;
+            font-weight: 600 !important;
+            border-bottom: 1px solid #4b5563 !important;
+            border-top-left-radius: calc(0.5rem - 1px);
+            border-top-right-radius: calc(0.5rem - 1px);
+        }
+
+        .cesium-infoBox-close {
+            top: 8px !important;
+            right: 8px !important;
+            color: #9ca3af !important;
+            font-size: 24px !important;
+            text-shadow: none !important;
+        }
+
+        .cesium-infoBox-close:hover {
+            color: #f3f4f6 !important;
+        }
+
+        .cesium-infoBox-description {
+            padding: 0.75rem !important;
+            font-size: 0.8rem !important;
+            line-height: 1.5 !important;
+            max-height: calc(100vh - 65px - 20px - 50px - 45px);
+            /* Ajustar altura restando título (aprox 45px) */
+            overflow-y: auto !important;
+        }
+
+        .cesium-infoBox-description.custom-scrollbar::-webkit-scrollbar-track {
+            background: #374151;
+        }
+
+        .cesium-infoBox-description.custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #5b7a9d;
+            border-color: #374151;
+        }
+
+        .cesium-infoBox-description.custom-scrollbar {
+            scrollbar-color: #5b7a9d #374151;
+        }
+
+        .cesium-infoBox-defaultTable,
+        .cesium-infoBox-description table.featureInfo {
+            width: 100% !important;
+            border-collapse: collapse !important;
+            color: #e5e7eb !important;
+        }
+
+        .cesium-infoBox-defaultTable th,
+        .cesium-infoBox-description table.featureInfo th,
+        .cesium-infoBox-defaultTable td,
+        .cesium-infoBox-description table.featureInfo td {
+            border: 1px solid #4b5563 !important;
+            padding: 0.4rem 0.6rem !important;
+            text-align: left !important;
+            color: inherit !important;
+        }
+
+        .cesium-infoBox-defaultTable th,
+        .cesium-infoBox-description table.featureInfo th {
+            background-color: #374151 !important;
+            font-weight: 600 !important;
+            color: #f3f4f6 !important;
         }
     </style>
 </head>
