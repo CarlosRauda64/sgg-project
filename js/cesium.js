@@ -7,6 +7,10 @@ Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOi
 const geoServerWorkspace = 'SGG'; // Tu workspace de GeoServer
 const geoServerWmsUrl = `https://geo.sggproject.me/geoserver/${geoServerWorkspace}/wms`; // URL para WMS
 
+// Coordenadas aproximadas para el bounding box de El Salvador
+// [oeste, sur, este, norte]
+const elSalvadorBoundingBox = [-90.15, 13.10, -87.60, 14.50]; 
+
 const divisionesAdministrativas = {
     "Ahuachapán": { municipios: { "Ahuachapán Centro": ["Ahuachapán", "Apaneca", "Concepción de Ataco", "Tacuba"], "Ahuachapán Norte": ["Atiquizaya", "El Refugio", "San Lorenzo", "Turín"], "Ahuachapán Sur": ["Guaymango", "Jujutla", "San Francisco Menéndez", "San Pedro Puxtla"] } },
     "Santa Ana": { municipios: { "Santa Ana Centro": ["Santa Ana"], "Santa Ana Este": ["Coatepeque", "El Congo"], "Santa Ana Norte": ["Masahuat", "Metapán", "Santa Rosa Guachipilín", "Texistepeque"], "Santa Ana Oeste": ["Candelaria de la Frontera", "Chalchuapa", "El Porvenir", "San Antonio Pajonal", "San Sebastián Salitrillo", "Santiago de la Frontera"] } },
@@ -114,11 +118,9 @@ const cesiumLayersConfig = {
         attributeAliases: {
             'fclass': 'Clase',
             'name':'Nombre'
-            // Completa con los atributos reales y alias de tu capa cuerposAgua
         },
         attributesToHide:[
-            'osm_id', 'code' 
-            // Completa con los atributos reales a ocultar de tu capa cuerposAgua
+            'osm_id', 'code'
          ],
     },
     deburga: {
@@ -194,7 +196,7 @@ async function initializeCesiumApp() {
             terrainProvider: terrainProviderInstance,
             animation: false,
             timeline: false,
-            homeButton: true,
+            homeButton: true, 
             sceneModePicker: true,
             baseLayerPicker: true,
             geocoder: false,
@@ -203,10 +205,37 @@ async function initializeCesiumApp() {
         });
         console.log("Visor de CesiumJS inicializado.");
 
+        // Definir el rectángulo para El Salvador
+        const elSalvadorRectangle = Cesium.Rectangle.fromDegrees(
+            elSalvadorBoundingBox[0], 
+            elSalvadorBoundingBox[1], 
+            elSalvadorBoundingBox[2], 
+            elSalvadorBoundingBox[3]  
+        );
+
+        // Volar a la vista de El Salvador al iniciar
         viewer.camera.flyTo({
-            destination: Cesium.Cartesian3.fromDegrees(-89.2182, 13.6929, 400000),
-            orientation: { heading: Cesium.Math.toRadians(0.0), pitch: Cesium.Math.toRadians(-45.0), roll: 0.0 }
+            destination: elSalvadorRectangle,
+            duration: 2.0 // Duración de la animación en segundos
         });
+
+        // Restringir la cámara a los límites de El Salvador
+        viewer.camera.constrainedExtent = elSalvadorRectangle;
+        viewer.scene.screenSpaceCameraController.minimumZoomDistance = 30000; // Ajusta según sea necesario (30km)
+        // Opcional: viewer.scene.screenSpaceCameraController.maximumZoomDistance = 1500000; // Ajusta según sea necesario (1500km)
+
+        // --- INICIO: MODIFICACIÓN DEL BOTÓN HOME ---
+        // Sobrescribir la acción del botón Home para que vuele a El Salvador
+        if (viewer.homeButton) { // Verificar que el botón Home exista
+            viewer.homeButton.viewModel.command.beforeExecute.addEventListener(function(commandInfo) {
+                viewer.camera.flyTo({
+                    destination: elSalvadorRectangle,
+                    duration: 1.5 
+                });
+                commandInfo.cancel = true; // Cancelar la acción por defecto del botón Home
+            });
+        }
+        // --- FIN: MODIFICACIÓN DEL BOTÓN HOME ---
 
     } catch (viewerError) {
         console.error("Error al inicializar el Cesium.Viewer:", viewerError);
@@ -225,7 +254,7 @@ async function initializeCesiumApp() {
         const imageryFeaturesPromise = viewer.imageryLayers.pickImageryLayerFeatures(ray, viewer.scene);
 
         if (!Cesium.defined(imageryFeaturesPromise)) {
-            if (viewer.selectedEntity) { // Si no hay promesa y algo estaba seleccionado, deseleccionar
+            if (viewer.selectedEntity && movement.position) { // Solo si hay posición de clic
                 viewer.selectedEntity = undefined;
             }
             return;
@@ -361,9 +390,9 @@ function createWMSImageryProvider(layerName, cqlFilter = "INCLUDE", infoFormat =
         },
         getFeatureInfoParameters: {
             INFO_FORMAT: infoFormat,
-            FEATURE_COUNT: 10 
+            FEATURE_COUNT: 10
         },
-        enablePickFeatures: enablePick 
+        enablePickFeatures: enablePick
     });
 }
 
@@ -382,7 +411,7 @@ function updateAllVisibleLayersOrder() {
                 filter: config.currentFilter,
                 zIndex: config.zIndex !== undefined ? config.zIndex : 0,
                 infoFormat: config.infoFormat,
-                allowGetFeatureInfo: config.allowGetFeatureInfo 
+                allowGetFeatureInfo: config.allowGetFeatureInfo
             });
         }
     }
@@ -401,10 +430,10 @@ function updateAllVisibleLayersOrder() {
     layersToShow.forEach(layerData => {
         const enablePicking = layerData.allowGetFeatureInfo === undefined ? true : layerData.allowGetFeatureInfo;
         const provider = createWMSImageryProvider(
-            layerData.name, 
-            layerData.filter, 
+            layerData.name,
+            layerData.filter,
             layerData.infoFormat || 'text/html',
-            enablePicking 
+            enablePicking
         );
         const cesiumLayer = viewer.imageryLayers.addImageryProvider(provider);
         cesiumLayersConfig[layerData.key].imageryLayer = cesiumLayer;
@@ -625,9 +654,13 @@ function resetAllFilters() {
     updateAllVisibleLayersOrder();
 
     if (viewer) {
+        const elSalvadorRectangle = Cesium.Rectangle.fromDegrees(
+            elSalvadorBoundingBox[0], elSalvadorBoundingBox[1],
+            elSalvadorBoundingBox[2], elSalvadorBoundingBox[3]
+        );
         viewer.camera.flyTo({
-            destination: Cesium.Cartesian3.fromDegrees(-89.2182, 13.6929, 400000),
-            orientation: { heading: Cesium.Math.toRadians(0.0), pitch: Cesium.Math.toRadians(-45.0), roll: 0.0 }
+            destination: elSalvadorRectangle,
+            duration: 1.5
         });
     }
 }
