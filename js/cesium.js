@@ -38,7 +38,7 @@ const cesiumLayersConfig = {
     cuerposAgua:    { name: `${geoServerWorkspace}:cuerposAgua`,    title: 'Cuerpos de Agua',   imageryLayer: null, toggleId: 'toggleCuerpos',      currentFilter: "INCLUDE", type: 'vector', legend: true,  zIndex: 13 },
     deburga:        { name: `${geoServerWorkspace}:deburga`,        title: 'DEGURBA',           imageryLayer: null, toggleId: 'toggleDeburga',      filterField: 'class',   currentFilter: "INCLUDE", type: 'vector', legend: true,  zIndex: 14 },
     construcciones: { name: `${geoServerWorkspace}:construcciones`, title: 'Construcciones',    imageryLayer: null, toggleId: 'toggleConstrucciones',currentFilter: "INCLUDE", type: 'vector', legend: false, zIndex: 15  },
-    rios:           { name: `${geoServerWorkspace}:rios`,           title: 'Ríos',              imageryLayer: null, toggleId: 'toggleRios',         currentFilter: "INCLUDE", type: 'vector', legend: true,  zIndex: 16 },
+    rios:           { name: `${geoServerWorkspace}:rios`,           title: 'Ríos y vías de agua',imageryLayer: null, toggleId: 'toggleRios',         currentFilter: "INCLUDE", type: 'vector', legend: true,  zIndex: 16 }, // Título actualizado para coincidir con UI
     carreteras:     { name: `${geoServerWorkspace}:carreteras`,     title: 'Carreteras',        imageryLayer: null, toggleId: 'toggleCarreteras',   currentFilter: "INCLUDE", type: 'vector', legend: false, zIndex: 17 }
 };
 
@@ -98,28 +98,44 @@ async function initializeCesiumApp() {
         }
 
         imageryFeaturesPromise.then(function(pickedImageryFeatures) {
-            let handledForCarreteras = false;
+            let customInfoBoxHandled = false; // Variable para indicar si ya manejamos el InfoBox
             if (Cesium.defined(pickedImageryFeatures) && pickedImageryFeatures.length > 0) {
                 for (let i = 0; i < pickedImageryFeatures.length; i++) {
                     const feature = pickedImageryFeatures[i];
                     
+                    // Comprueba si la capa de imágenes del feature es la capa de CARRETERAS
                     if (cesiumLayersConfig.carreteras && 
                         feature.imageryLayer && 
                         cesiumLayersConfig.carreteras.imageryLayer && 
                         feature.imageryLayer === cesiumLayersConfig.carreteras.imageryLayer) {
                         
-                        const carreteraEntity = new Cesium.Entity({
-                            id: 'custom-carretera-infobox-entity',
+                        const customEntity = new Cesium.Entity({
+                            id: 'custom-carreteras-infobox-entity',
                             name: cesiumLayersConfig.carreteras.title || "Información de Carretera",
                             description: '<div style="padding:10px;">Carretera</div>'
                         });
-                        viewer.selectedEntity = carreteraEntity;
-                        handledForCarreteras = true;
+                        viewer.selectedEntity = customEntity;
+                        customInfoBoxHandled = true;
                         break; 
+                    } 
+                    // Comprueba si la capa de imágenes del feature es la capa de RÍOS
+                    else if (cesiumLayersConfig.rios &&
+                               feature.imageryLayer &&
+                               cesiumLayersConfig.rios.imageryLayer &&
+                               feature.imageryLayer === cesiumLayersConfig.rios.imageryLayer) {
+                        
+                        const customEntity = new Cesium.Entity({
+                            id: 'custom-rios-infobox-entity',
+                            name: cesiumLayersConfig.rios.title || "Información de Río/Vía de Agua",
+                            description: '<div style="padding:10px;">Río o Vía de Agua</div>'
+                        });
+                        viewer.selectedEntity = customEntity;
+                        customInfoBoxHandled = true;
+                        break;
                     }
                 }
             }
-        }).catch(function(error) { // ***** CORRECCIÓN AQUÍ: .otherwise CAMBIADO A .catch *****
+        }).catch(function(error) {
             console.error("Error al seleccionar características de la capa de imágenes:", error);
         });
     }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
