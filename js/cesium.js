@@ -7,7 +7,7 @@ Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOi
 const geoServerWorkspace = 'SGG'; // Tu workspace de GeoServer
 const geoServerWmsUrl = `https://geo.sggproject.me/geoserver/${geoServerWorkspace}/wms`; // URL para WMS
 
-const divisionesAdministrativas = { // Tu estructura de divisiones
+const divisionesAdministrativas = { 
     "Ahuachapán": { municipios: { "Ahuachapán Centro": ["Ahuachapán", "Apaneca", "Concepción de Ataco", "Tacuba"], "Ahuachapán Norte": ["Atiquizaya", "El Refugio", "San Lorenzo", "Turín"], "Ahuachapán Sur": ["Guaymango", "Jujutla", "San Francisco Menéndez", "San Pedro Puxtla"]}},
     "Santa Ana": { municipios: { "Santa Ana Centro": ["Santa Ana"], "Santa Ana Este": ["Coatepeque", "El Congo"], "Santa Ana Norte": ["Masahuat", "Metapán", "Santa Rosa Guachipilín", "Texistepeque"], "Santa Ana Oeste": ["Candelaria de la Frontera", "Chalchuapa", "El Porvenir", "San Antonio Pajonal", "San Sebastián Salitrillo", "Santiago de la Frontera"]}},
     "La Libertad": { municipios: { "La Libertad Centro": ["Ciudad Arce", "San Juan Opico"], "La Libertad Costa": ["Chiltiupán", "Jicalapa", "La Libertad", "Tamanique", "Teotepeque"], "La Libertad Este": ["Antiguo Cuscatlán", "Huizúcar", "Nuevo Cuscatlán", "San José Villanueva", "Zaragoza"], "La Libertad Norte": ["Quezaltepeque", "San Matías", "San Pablo Tacachico"], "La Libertad Oeste": ["Colón", "Jayaque", "Sacacoyo", "Talnique", "Tepecoyo"], "La Libertad Sur": ["Comasagua", "Santa Tecla"]}},
@@ -25,25 +25,42 @@ const resetFiltersButton = document.getElementById('resetFiltersButton');
 
 // --- Definición de Capas para CesiumJS con zIndex ---
 const cesiumLayersConfig = {
-    // --- CAPAS RÁSTER (zIndex más bajos) ---
     superficie:     { name: `${geoServerWorkspace}:superficie`,     title: 'Superficie',        imageryLayer: null, toggleId: 'toggleSuperficie',   currentFilter: "INCLUDE", type: 'raster', legend: false, zIndex: 0 },
     temperatura:    { name: `${geoServerWorkspace}:temperatura`,    title: 'Temperatura (LST)', imageryLayer: null, toggleId: 'toggleTemperatura',  currentFilter: "INCLUDE", type: 'raster', legend: true,  zIndex: 5 },
     vegetacion:     { name: `${geoServerWorkspace}:vegetacion`,     title: 'Vegetación (NDVI)', imageryLayer: null, toggleId: 'toggleVegetacion',   currentFilter: "INCLUDE", type: 'raster', legend: true,  zIndex: 4 },
     suelos:         { name: `${geoServerWorkspace}:Uso de Suelo`,   title: 'Uso de Suelo',      imageryLayer: null, toggleId: 'toggleSuelos',       currentFilter: "INCLUDE", type: 'raster', legend: true,  zIndex: 3 },
-
-    // --- CAPAS VECTORIALES (zIndex más altos, se dibujan encima de los rásters) ---
-    departamento:   { name: `${geoServerWorkspace}:departamento`,   title: 'Departamentos',     imageryLayer: null, toggleId: 'toggleDepartamento', filterField: 'adm1_es', currentFilter: "INCLUDE", type: 'vector', legend: false, zIndex: 10 },
-    municipios:     { name: `${geoServerWorkspace}:municipio`,      title: 'Municipios',        imageryLayer: null, toggleId: 'toggleMunicipios',   filterField: 'adm2_es', currentFilter: "INCLUDE", type: 'vector', legend: false, zIndex: 11 },
-    distrito:       { name: `${geoServerWorkspace}:distrito`,       title: 'Distritos',         imageryLayer: null, toggleId: 'toggleDistrito',     filterField: 'adm3_es', currentFilter: "INCLUDE", type: 'vector', legend: false, zIndex: 12 },
-    cuerposAgua:    { name: `${geoServerWorkspace}:cuerposAgua`,    title: 'Cuerpos de Agua',   imageryLayer: null, toggleId: 'toggleCuerpos',      currentFilter: "INCLUDE", type: 'vector', legend: true,  zIndex: 13 },
-    deburga:        { name: `${geoServerWorkspace}:deburga`,        title: 'DEGURBA',           imageryLayer: null, toggleId: 'toggleDeburga',      filterField: 'class',   currentFilter: "INCLUDE", type: 'vector', legend: true,  zIndex: 14 },
-    construcciones: { name: `${geoServerWorkspace}:construcciones`, title: 'Construcciones',    imageryLayer: null, toggleId: 'toggleConstrucciones',currentFilter: "INCLUDE", type: 'vector', legend: false, zIndex: 15  },
-    rios:           { name: `${geoServerWorkspace}:rios`,           title: 'Ríos y vías de agua',imageryLayer: null, toggleId: 'toggleRios',         currentFilter: "INCLUDE", type: 'vector', legend: true,  zIndex: 16 }, // Título actualizado para coincidir con UI
+    departamento:   { name: `${geoServerWorkspace}:departamento`,   title: 'Departamentos',     imageryLayer: null, toggleId: 'toggleDepartamento', filterField: 'adm1_es', currentFilter: "INCLUDE", type: 'vector', legend: false, zIndex: 10, infoFormat: 'application/json' },
+    municipios:     { name: `${geoServerWorkspace}:municipio`,      title: 'Municipios',        imageryLayer: null, toggleId: 'toggleMunicipios',   filterField: 'adm2_es', currentFilter: "INCLUDE", type: 'vector', legend: false, zIndex: 11, infoFormat: 'application/json' },
+    distrito:       { name: `${geoServerWorkspace}:distrito`,       title: 'Distritos',         imageryLayer: null, toggleId: 'toggleDistrito',     filterField: 'adm3_es', currentFilter: "INCLUDE", type: 'vector', legend: false, zIndex: 12, infoFormat: 'application/json' },
+    cuerposAgua:    { name: `${geoServerWorkspace}:cuerposAgua`,    title: 'Cuerpos de Agua',   imageryLayer: null, toggleId: 'toggleCuerpos',      currentFilter: "INCLUDE", type: 'vector', legend: true,  zIndex: 13, infoFormat: 'application/json' }, 
+    deburga:        { name: `${geoServerWorkspace}:deburga`,        title: 'DEGURBA',           imageryLayer: null, toggleId: 'toggleDeburga',      filterField: 'class',   currentFilter: "INCLUDE", type: 'vector', legend: true,  zIndex: 14, infoFormat: 'application/json' },
+    construcciones: { 
+        name: `${geoServerWorkspace}:construcciones`, 
+        title: 'Construcciones',    
+        imageryLayer: null, 
+        toggleId: 'toggleConstrucciones',
+        currentFilter: "INCLUDE", 
+        type: 'vector', 
+        legend: false, 
+        zIndex: 15,
+        infoFormat: 'application/json', 
+        attributeAliases: { 
+            'osm_id': 'ID OSM',
+            'name': 'Nombre',
+            'type': 'Tipo de Construcción',
+            'code': 'Código',
+            'fclass': 'Clase Funcional',
+            // Asegúrate de que estos nombres de atributo ('osm_id', 'name', etc.)
+            // coincidan EXACTAMENTE con los que devuelve GeoServer en la respuesta JSON.
+            // Son sensibles a mayúsculas/minúsculas.
+        }
+    },
+    rios:           { name: `${geoServerWorkspace}:rios`,           title: 'Ríos y vías de agua',imageryLayer: null, toggleId: 'toggleRios',         currentFilter: "INCLUDE", type: 'vector', legend: true,  zIndex: 16 },
     carreteras:     { name: `${geoServerWorkspace}:carreteras`,     title: 'Carreteras',        imageryLayer: null, toggleId: 'toggleCarreteras',   currentFilter: "INCLUDE", type: 'vector', legend: false, zIndex: 17 }
 };
 
-let viewer; // Variable global para el visor de Cesium
-let screenSpaceEventHandler = null; // Variable para el manejador de eventos de clic
+let viewer; 
+let screenSpaceEventHandler = null; 
 
 async function initializeCesiumApp() {
     let terrainProviderInstance;
@@ -98,44 +115,91 @@ async function initializeCesiumApp() {
         }
 
         imageryFeaturesPromise.then(function(pickedImageryFeatures) {
-            let customInfoBoxHandled = false; // Variable para indicar si ya manejamos el InfoBox
+            let customInfoBoxHandled = false; 
             if (Cesium.defined(pickedImageryFeatures) && pickedImageryFeatures.length > 0) {
                 for (let i = 0; i < pickedImageryFeatures.length; i++) {
-                    const feature = pickedImageryFeatures[i];
+                    const feature = pickedImageryFeatures[i]; 
                     
-                    // Comprueba si la capa de imágenes del feature es la capa de CARRETERAS
-                    if (cesiumLayersConfig.carreteras && 
-                        feature.imageryLayer && 
-                        cesiumLayersConfig.carreteras.imageryLayer && 
-                        feature.imageryLayer === cesiumLayersConfig.carreteras.imageryLayer) {
-                        
-                        const customEntity = new Cesium.Entity({
-                            id: 'custom-carreteras-infobox-entity',
-                            name: cesiumLayersConfig.carreteras.title || "Información de Carretera",
-                            description: '<div style="padding:10px;">Carretera</div>'
-                        });
-                        viewer.selectedEntity = customEntity;
-                        customInfoBoxHandled = true;
-                        break; 
-                    } 
-                    // Comprueba si la capa de imágenes del feature es la capa de RÍOS
-                    else if (cesiumLayersConfig.rios &&
-                               feature.imageryLayer &&
-                               cesiumLayersConfig.rios.imageryLayer &&
-                               feature.imageryLayer === cesiumLayersConfig.rios.imageryLayer) {
-                        
-                        const customEntity = new Cesium.Entity({
-                            id: 'custom-rios-infobox-entity',
-                            name: cesiumLayersConfig.rios.title || "Información de Río/Vía de Agua",
-                            description: '<div style="padding:10px;">Río o Vía de Agua</div>'
-                        });
-                        viewer.selectedEntity = customEntity;
-                        customInfoBoxHandled = true;
-                        break;
+                    if (feature.imageryLayer) { 
+                        const layerConfigKey = Object.keys(cesiumLayersConfig).find(key => 
+                            cesiumLayersConfig[key].imageryLayer === feature.imageryLayer
+                        );
+                        const config = layerConfigKey ? cesiumLayersConfig[layerConfigKey] : null;
+                        let layerTitle = config ? (config.title || feature.imageryLayer.imageryProvider.layers) : feature.imageryLayer.imageryProvider.layers;
+                        let entityIdSuffix = Math.random().toString(36).substring(7);
+
+                        if (config && layerConfigKey === 'carreteras') {
+                            const customEntity = new Cesium.Entity({
+                                id: `custom-${layerConfigKey}-infobox-entity`,
+                                name: layerTitle,
+                                description: '<div style="padding:10px;">Carretera</div>'
+                            });
+                            viewer.selectedEntity = customEntity;
+                            customInfoBoxHandled = true;
+                            break; 
+                        } 
+                        else if (config && layerConfigKey === 'rios') {
+                            const customEntity = new Cesium.Entity({
+                                id: `custom-${layerConfigKey}-infobox-entity`,
+                                name: layerTitle,
+                                description: '<div style="padding:10px;">Río o Vía de Agua</div>'
+                            });
+                            viewer.selectedEntity = customEntity;
+                            customInfoBoxHandled = true;
+                            break;
+                        }
+                        else if (config) { 
+                            let descriptionHtml = '';
+                            if (feature.properties && config.attributeAliases) {
+                                descriptionHtml = '<table class="cesium-infoBox-defaultTable"><tbody>'; // No añadir estilos en línea aquí para que use los del CSS
+                                let hasContent = false;
+                                for (const key in feature.properties) {
+                                    if (Object.hasOwnProperty.call(feature.properties, key) && 
+                                        feature.properties[key] !== null && 
+                                        feature.properties[key] !== undefined &&
+                                        String(feature.properties[key]).trim() !== '') {
+                                        
+                                        if (typeof feature.properties[key] === 'object' && feature.properties[key] !== null && feature.properties[key].type && feature.properties[key].coordinates) {
+                                            continue;
+                                        }
+
+                                        const displayName = config.attributeAliases[key] || key.charAt(0).toUpperCase() + key.slice(1);
+                                        // MODIFICACIÓN: Se quita background-color del <th> para heredar del CSS
+                                        descriptionHtml += `<tr><th style="padding: 4px; border: 1px solid #ddd; font-weight: bold; vertical-align: top; text-align:left;">${displayName}</th><td style="padding: 4px; border: 1px solid #ddd; vertical-align: top; text-align:left;">${feature.properties[key]}</td></tr>`;
+                                        hasContent = true;
+                                        if (key.toLowerCase() === 'fid' || key.toLowerCase() === 'id' || key.toLowerCase().includes('id') || key.toLowerCase() === 'osm_id') {
+                                            entityIdSuffix = String(feature.properties[key]).replace(/\W/g, '');
+                                        }
+                                    }
+                                }
+                                descriptionHtml += '</tbody></table>';
+                                if (!hasContent) {
+                                    descriptionHtml = '<div style="padding:10px;">No hay información de atributos para mostrar.</div>';
+                                }
+                            } else if (feature.description) { 
+                                descriptionHtml = feature.description;
+                                 if (feature.name) entityIdSuffix = feature.name.replace(/\W/g, '');
+                            } else {
+                                descriptionHtml = '<div style="padding:10px;">Información no disponible.</div>';
+                            }
+                            
+                            const genericEntity = new Cesium.Entity({
+                                id: `generic-infobox-${layerTitle.replace(/\W/g, '')}-${entityIdSuffix}`,
+                                name: layerTitle,
+                                description: descriptionHtml 
+                            });
+                            viewer.selectedEntity = genericEntity;
+                            customInfoBoxHandled = true;
+                            break; 
+                        }
                     }
                 }
             }
-        }).catch(function(error) {
+            if (!customInfoBoxHandled && pickedImageryFeatures && pickedImageryFeatures.length === 0 && viewer.selectedEntity && movement.position) {
+                 // Solo deseleccionar si se hizo clic y no se picó nada de imagery
+                 viewer.selectedEntity = undefined; 
+            }
+        }).catch(function(error) { 
             console.error("Error al seleccionar características de la capa de imágenes:", error);
         });
     }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
@@ -144,7 +208,7 @@ async function initializeCesiumApp() {
     applyInitialLayerVisibility();
 }
 
-function createWMSImageryProvider(layerName, cqlFilter = "INCLUDE") {
+function createWMSImageryProvider(layerName, cqlFilter = "INCLUDE", infoFormat = 'text/html') {
     return new Cesium.WebMapServiceImageryProvider({
         url: geoServerWmsUrl,
         layers: layerName,
@@ -154,6 +218,10 @@ function createWMSImageryProvider(layerName, cqlFilter = "INCLUDE") {
             CQL_FILTER: cqlFilter,
             VERSION: '1.1.1', 
         },
+        getFeatureInfoParameters: { 
+            INFO_FORMAT: infoFormat,
+            FEATURE_COUNT: 10 
+        },
         enablePickFeatures: true 
     });
 }
@@ -172,6 +240,7 @@ function updateAllVisibleLayersOrder() {
                 name: config.name, 
                 filter: config.currentFilter,
                 zIndex: config.zIndex !== undefined ? config.zIndex : 0,
+                infoFormat: config.infoFormat // Pasar el infoFormat
             });
         }
     }
@@ -188,7 +257,7 @@ function updateAllVisibleLayersOrder() {
     });
     
     layersToShow.forEach(layerData => {
-        const provider = createWMSImageryProvider(layerData.name, layerData.filter);
+        const provider = createWMSImageryProvider(layerData.name, layerData.filter, layerData.infoFormat || 'text/html');
         const cesiumLayer = viewer.imageryLayers.addImageryProvider(provider);
         cesiumLayersConfig[layerData.key].imageryLayer = cesiumLayer; 
     });
