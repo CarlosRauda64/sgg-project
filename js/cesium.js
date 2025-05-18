@@ -33,7 +33,35 @@ const cesiumLayersConfig = {
     municipios:     { name: `${geoServerWorkspace}:municipio`,      title: 'Municipios',        imageryLayer: null, toggleId: 'toggleMunicipios',   filterField: 'adm2_es', currentFilter: "INCLUDE", type: 'vector', legend: false, zIndex: 11, infoFormat: 'application/json' },
     distrito:       { name: `${geoServerWorkspace}:distrito`,       title: 'Distritos',         imageryLayer: null, toggleId: 'toggleDistrito',     filterField: 'adm3_es', currentFilter: "INCLUDE", type: 'vector', legend: false, zIndex: 12, infoFormat: 'application/json' },
     cuerposAgua:    { name: `${geoServerWorkspace}:cuerposAgua`,    title: 'Cuerpos de Agua',   imageryLayer: null, toggleId: 'toggleCuerpos',      currentFilter: "INCLUDE", type: 'vector', legend: true,  zIndex: 13, infoFormat: 'application/json' }, 
-    deburga:        { name: `${geoServerWorkspace}:deburga`,        title: 'DEGURBA',           imageryLayer: null, toggleId: 'toggleDeburga',      filterField: 'class',   currentFilter: "INCLUDE", type: 'vector', legend: true,  zIndex: 14, infoFormat: 'application/json' },
+    deburga:        { 
+        name: `${geoServerWorkspace}:deburga`,        
+        title: 'DEGURBA',           
+        imageryLayer: null, 
+        toggleId: 'toggleDeburga',      
+        filterField: 'class',   
+        currentFilter: "INCLUDE", 
+        type: 'vector', 
+        legend: true,  
+        zIndex: 14, 
+        infoFormat: 'application/json',
+        attributeAliases: {
+            'sum_person': 'Población Total',
+            'sum_hogare': 'Hogares Totales',
+            'sum_vivien': 'Viviendas Totales',
+            'class': 'Clasificación DEGURBA',
+            'nivel': 'Nivel DEGURBA',
+            'nombre_dep': 'Departamento',
+            'nombre_mun': 'Municipio',
+            'nombre_dis': 'Distrito',
+            'densidad': 'Densidad Poblacional'
+        },
+        attributesToHide: [
+            'fid', 'objectid', 'cod', 'id_depto', 'id_mun', 'id_distrit', 
+            'sum_area_k', 'objectid_1', 'select_dis', 'select_mun', 'select_dep',
+            'shape__are', 'shape__len'
+            // No es necesario listar variantes como select_dis_1, ya que el código buscará por prefijo.
+        ]
+    },
     construcciones: { 
         name: `${geoServerWorkspace}:construcciones`, 
         title: 'Construcciones',    
@@ -47,12 +75,9 @@ const cesiumLayersConfig = {
         attributeAliases: { 
             'osm_id': 'ID OSM',
             'name': 'Nombre',
-            'type': 'Tipo de Construcción',
+            'type': 'Tipo de Construcción', // Asegúrate que 'type' es el nombre real del campo
             'code': 'Código',
             'fclass': 'Clase Funcional',
-            // Asegúrate de que estos nombres de atributo ('osm_id', 'name', etc.)
-            // coincidan EXACTAMENTE con los que devuelve GeoServer en la respuesta JSON.
-            // Son sensibles a mayúsculas/minúsculas.
         }
     },
     rios:           { name: `${geoServerWorkspace}:rios`,           title: 'Ríos y vías de agua',imageryLayer: null, toggleId: 'toggleRios',         currentFilter: "INCLUDE", type: 'vector', legend: true,  zIndex: 16 },
@@ -150,25 +175,47 @@ async function initializeCesiumApp() {
                         }
                         else if (config) { 
                             let descriptionHtml = '';
-                            if (feature.properties && config.attributeAliases) {
-                                descriptionHtml = '<table class="cesium-infoBox-defaultTable"><tbody>'; // No añadir estilos en línea aquí para que use los del CSS
+                            // Si tenemos feature.properties (esperando JSON) Y hay alias o atributos a ocultar definidos
+                            if (feature.properties && (config.attributeAliases || config.attributesToHide)) {
+                                descriptionHtml = '<table class="cesium-infoBox-defaultTable"><tbody>';
                                 let hasContent = false;
                                 for (const key in feature.properties) {
-                                    if (Object.hasOwnProperty.call(feature.properties, key) && 
-                                        feature.properties[key] !== null && 
-                                        feature.properties[key] !== undefined &&
-                                        String(feature.properties[key]).trim() !== '') {
-                                        
-                                        if (typeof feature.properties[key] === 'object' && feature.properties[key] !== null && feature.properties[key].type && feature.properties[key].coordinates) {
-                                            continue;
+                                    if (Object.hasOwnProperty.call(feature.properties, key)) {
+                                        // Verificar si el atributo debe ocultarse
+                                        let hideAttribute = false;
+                                        if (config.attributesToHide) {
+                                            if (config.attributesToHide.includes(key)) {
+                                                hideAttribute = true;
+                                            } else {
+                                                // Para ocultar por prefijo como "select_"
+                                                for (const prefixToHide of ['select_']) { // Puedes añadir más prefijos aquí
+                                                    if (key.startsWith(prefixToHide) && config.attributesToHide.includes(prefixToHide + 'dis')) { // Asumiendo que 'select_dis' representa la intención de ocultar todos los 'select_'
+                                                        hideAttribute = true;
+                                                        break;
+                                                    }
+                                                }
+                                            }
                                         }
+                                        if (hideAttribute) continue; // Saltar este atributo
 
-                                        const displayName = config.attributeAliases[key] || key.charAt(0).toUpperCase() + key.slice(1);
-                                        // MODIFICACIÓN: Se quita background-color del <th> para heredar del CSS
-                                        descriptionHtml += `<tr><th style="padding: 4px; border: 1px solid #ddd; font-weight: bold; vertical-align: top; text-align:left;">${displayName}</th><td style="padding: 4px; border: 1px solid #ddd; vertical-align: top; text-align:left;">${feature.properties[key]}</td></tr>`;
-                                        hasContent = true;
-                                        if (key.toLowerCase() === 'fid' || key.toLowerCase() === 'id' || key.toLowerCase().includes('id') || key.toLowerCase() === 'osm_id') {
-                                            entityIdSuffix = String(feature.properties[key]).replace(/\W/g, '');
+
+                                        if (feature.properties[key] !== null && 
+                                            feature.properties[key] !== undefined &&
+                                            String(feature.properties[key]).trim() !== '') {
+                                            
+                                            if (typeof feature.properties[key] === 'object' && feature.properties[key] !== null && feature.properties[key].type && feature.properties[key].coordinates) {
+                                                continue;
+                                            }
+
+                                            const displayName = (config.attributeAliases && config.attributeAliases[key]) 
+                                                                ? config.attributeAliases[key] 
+                                                                : key.charAt(0).toUpperCase() + key.slice(1);
+                                            
+                                            descriptionHtml += `<tr><th style="padding: 4px; border: 1px solid #ddd; font-weight: bold; vertical-align: top; text-align:left;">${displayName}</th><td style="padding: 4px; border: 1px solid #ddd; vertical-align: top; text-align:left;">${feature.properties[key]}</td></tr>`;
+                                            hasContent = true;
+                                            if (key.toLowerCase() === 'fid' || key.toLowerCase() === 'id' || key.toLowerCase().includes('id') || key.toLowerCase() === 'osm_id') {
+                                                entityIdSuffix = String(feature.properties[key]).replace(/\W/g, '');
+                                            }
                                         }
                                     }
                                 }
@@ -196,7 +243,6 @@ async function initializeCesiumApp() {
                 }
             }
             if (!customInfoBoxHandled && pickedImageryFeatures && pickedImageryFeatures.length === 0 && viewer.selectedEntity && movement.position) {
-                 // Solo deseleccionar si se hizo clic y no se picó nada de imagery
                  viewer.selectedEntity = undefined; 
             }
         }).catch(function(error) { 
@@ -240,7 +286,7 @@ function updateAllVisibleLayersOrder() {
                 name: config.name, 
                 filter: config.currentFilter,
                 zIndex: config.zIndex !== undefined ? config.zIndex : 0,
-                infoFormat: config.infoFormat // Pasar el infoFormat
+                infoFormat: config.infoFormat 
             });
         }
     }
