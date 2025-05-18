@@ -13,7 +13,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
     <style>
-        /* --- ESTILOS GENERALES (los que ya tenías) --- */
         html,
         body {
             height: 100%;
@@ -27,7 +26,6 @@
             display: flex;
             height: 100vh;
             padding: 1.25rem;
-            /* p-5 */
             background-color: #eaf3fb;
         }
 
@@ -36,9 +34,7 @@
             background-color: #2c3e50;
             color: white;
             padding: 1.25rem;
-            /* p-5 */
             border-radius: 0.5rem;
-            /* rounded-lg */
             display: flex;
             flex-direction: column;
             height: calc(100vh - 2.5rem);
@@ -48,7 +44,6 @@
         .map-area {
             flex: 1;
             margin-left: 1.25rem;
-            /* ml-5 */
             position: relative;
             height: calc(100vh - 2.5rem);
         }
@@ -57,27 +52,20 @@
             width: 100%;
             height: 100%;
             border: 2px solid #d1d5db;
-            /* border-gray-300 */
             border-radius: 0.5rem;
-            /* rounded-lg */
             overflow: hidden;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            /* shadow-md */
             background-color: white;
         }
 
         #filter-bar {
             position: absolute;
             top: 0.75rem;
-            /* top-3 */
             left: 0.75rem;
-            /* left-3 */
             background-color: #2c3e50;
             color: white;
             padding: 0.75rem;
-            /* p-3 */
             border-radius: 0.5rem;
-            /* rounded-lg */
             display: flex;
             flex-wrap: wrap;
             align-items: center;
@@ -166,14 +154,10 @@
             scrollbar-color: #5b7a9d #2c3e50;
         }
 
-        /* --- ESTILOS PARA WIDGETS DE CESIUM Y EL INFOBOX --- */
         .cesium-viewer-toolbar {
-            /* Contenedor de los botones de la esquina superior derecha */
             top: 20px !important;
-            /* Mueve un poco hacia abajo los botones de Cesium */
             right: 15px !important;
             z-index: 1001 !important;
-            /* Asegurar que los botones de Cesium estén encima del InfoBox si es necesario */
         }
 
         .cesium-viewer-animationContainer,
@@ -182,26 +166,16 @@
         }
 
         .cesium-infoBox {
-            /* Posición y tamaño */
-            /* Ajustamos 'top' para que esté debajo de .cesium-viewer-toolbar */
-            /* La altura de la toolbar de Cesium es aprox 32px-40px + el 'top' que le demos. */
-            /* Si .cesium-viewer-toolbar tiene top: 20px y una altura de 32px, necesitamos que el InfoBox empiece después de 20+32 = 52px */
             top: 65px !important;
-            /* AUMENTADO: Distancia desde arriba. (20px para toolbar + ~40px altura toolbar + 5px margen) */
             right: 20px !important;
             width: 320px !important;
-            /* La max-height se calculará para no chocar con la parte inferior si es necesario */
             max-height: calc(100vh - 65px - 20px - 50px);
-            /* top - bottom_margin - cesium_timeline_approx_height */
-
-            /* Apariencia (como la tenías) */
             background: #2c3e50 !important;
             border: 1px solid #4b5563 !important;
             border-radius: 0.5rem !important;
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2), 0 4px 6px -2px rgba(0, 0, 0, 0.1) !important;
             color: white !important;
             z-index: 999 !important;
-            /* Debajo de la toolbar de Cesium y topbar, pero encima del mapa */
         }
 
         .cesium-infoBox-title {
@@ -232,7 +206,6 @@
             font-size: 0.8rem !important;
             line-height: 1.5 !important;
             max-height: calc(100vh - 65px - 20px - 50px - 45px);
-            /* Ajustar altura restando título (aprox 45px) */
             overflow-y: auto !important;
         }
 
