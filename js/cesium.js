@@ -79,7 +79,7 @@ const cesiumLayersConfig = {
         name: `${geoServerWorkspace}:construcciones`, title: 'Construcciones', imageryLayer: null, toggleId: 'toggleConstrucciones', currentFilter: "INCLUDE", type: 'vector', legend: false, zIndex: 15, infoFormat: 'application/json', allowGetFeatureInfo: true,
         attributeAliases: { 'osm_id': 'ID OSM', 'name': 'Nombre', 'type': 'Tipo', 'code': 'Código', 'fclass': 'Clase Funcional' }
     },
-    rios: { name: `${geoServerWorkspace}:rios`, title: 'Ríos y vías de agua', imageryLayer: null, toggleId: 'toggleRios', currentFilter: "INCLUDE", type: 'vector', legend: true, zIndex: 16, allowGetFeatureInfo: true },
+    rios: { name: `${geoServerWorkspace}:rios`, title: 'Ríos y vías de agua', imageryLayer: null, toggleId: 'toggleRios', currentFilter: "INCLUDE", type: 'vector', legend: false, zIndex: 16, allowGetFeatureInfo: true },
     carreteras: { name: `${geoServerWorkspace}:carreteras`, title: 'Carreteras', imageryLayer: null, toggleId: 'toggleCarreteras', currentFilter: "INCLUDE", type: 'vector', legend: false, zIndex: 17, allowGetFeatureInfo: true }
 };
 
