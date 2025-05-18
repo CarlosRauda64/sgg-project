@@ -1,122 +1,200 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <title>Visor 3D GeoServer con CesiumJS</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
 
     <script src="https://cesium.com/downloads/cesiumjs/releases/1.118/Build/Cesium/Cesium.js"></script>
     <link href="https://cesium.com/downloads/cesiumjs/releases/1.118/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
-
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
     <style>
-        /* Estilos básicos para Cesium y tu UI */
-        html, body {
+        html,
+        body {
             height: 100%;
             margin: 0;
             padding: 0;
-            overflow: hidden; /* Evitar scrollbars en el body */
-            font-family: sans-serif; /* Coherencia con Tailwind */
+            overflow: hidden;
+            font-family: sans-serif;
         }
 
-        /* Contenedor principal de la aplicación flex */
         .app-container {
             display: flex;
-            height: 100vh; /* Ocupar toda la altura de la ventana */
-            padding: 1.25rem; /* p-5 de Tailwind */
-            background-color: #eaf3fb; /* bg-[#eaf3fb] de Tailwind */
+            height: 100vh;
+            padding: 1.25rem;
+            /* p-5 */
+            background-color: #eaf3fb;
         }
 
-        /* Sidebar (topbar) */
         #topbar {
-            width: 15rem; /* w-60 */
-            background-color: #2c3e50; /* bg-[#2c3e50] */
+            width: 18rem;
+            background-color: #2c3e50;
             color: white;
-            padding: 1.25rem; /* p-5 */
-            border-radius: 0.5rem; /* rounded-lg */
+            padding: 1.25rem;
+            /* p-5 */
+            border-radius: 0.5rem;
+            /* rounded-lg */
             display: flex;
             flex-direction: column;
-            height: calc(100vh - 2.5rem); /* h-[calc(100vh-2.5rem)] */
-            z-index: 100; /* Para estar sobre Cesium */
+            height: calc(100vh - 2.5rem);
+            z-index: 100;
         }
 
-        /* Contenedor del mapa y elementos flotantes */
         .map-area {
             flex: 1;
-            margin-left: 1.25rem; /* ml-5 */
-            position: relative; /* Para posicionar elementos absolutos dentro */
-            height: calc(100vh - 2.5rem); /* Ajustar altura */
+            margin-left: 1.25rem;
+            /* ml-5 */
+            position: relative;
+            height: calc(100vh - 2.5rem);
         }
 
         #cesiumContainer {
             width: 100%;
             height: 100%;
-            border: 2px solid #d1d5db; /* border-2 border-gray-300 */
-            border-radius: 0.5rem; /* rounded-lg */
+            border: 2px solid #d1d5db;
+            /* border-gray-300 */
+            border-radius: 0.5rem;
+            /* rounded-lg */
             overflow: hidden;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06); /* shadow-md */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            /* shadow-md */
             background-color: white;
         }
 
-        /* Barra de filtros */
         #filter-bar {
             position: absolute;
-            top: 0.75rem; /* top-3 */
-            left: 0.75rem; /* left-3 */
-            /* right: calc(180px + 1rem + 0.75rem); /* Ajustado para dejar espacio a la leyenda y un poco más */
-            /* Dejaremos que el right se ajuste o lo controlamos con max-width si es necesario */
-            background-color: #2c3e50; /* bg-[#2c3e50] */
+            top: 0.75rem;
+            /* top-3 */
+            left: 0.75rem;
+            /* left-3 */
+            background-color: #2c3e50;
             color: white;
-            padding: 0.75rem; /* p-3 */
-            border-radius: 0.5rem; /* rounded-lg */
+            padding: 0.75rem;
+            /* p-3 */
+            border-radius: 0.5rem;
+            /* rounded-lg */
             display: flex;
             flex-wrap: wrap;
             align-items: center;
-            gap: 0.5rem; /* Reemplaza space-x-2 y space-y-2 */
-            z-index: 90; /* Sobre Cesium pero debajo de los widgets de Cesium */
-        }
-         #filter-bar select { background-color: white; color: #374151; border-color: #9ca3af; }
-         #filter-bar select:disabled { background-color: #4b5563; color: #d1d5db; opacity: 0.7; cursor: not-allowed; border-color: #6b7280;}
-
-
-        /* Panel de Leyenda - Ajustado para no cubrir los botones de Cesium */
-        #legend-panel {
-            position: absolute;
-            top: 0.75rem; /* top-3 */
-            right: 0.75rem; /* right-3 */
-            width: 200px; /* w-[180px] o un poco más si es necesario */
-            background-color: #2c3e50; /* bg-[#2c3e50] */
-            color: white;
-            padding: 0.75rem; /* p-3 */
-            border-radius: 0.5rem; /* rounded-lg */
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06); /* shadow-md */
-            z-index: 90; /* Sobre Cesium */
-            /* Ajustamos la altura máxima para que no cubra los controles inferiores de Cesium si los hubiera */
-            max-height: calc(100% - 50px); /* Deja espacio abajo */
-        }
-        #legend-content {
-            max-height: calc(100vh - 12rem - 50px); /* Ajuste de tu estilo original menos el espacio de los controles de Cesium */
+            gap: 0.5rem;
+            z-index: 90;
         }
 
+        #filter-bar select {
+            background-color: white;
+            color: #374151;
+            border-color: #9ca3af;
+        }
 
-        /* Scrollbar personalizado (como lo tenías) */
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #2c3e50; border-radius: 3px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #5b7a9d; border-radius: 3px; border: 1px solid #2c3e50; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background-color: #7492b3; }
-        .custom-scrollbar { scrollbar-width: thin; scrollbar-color: #5b7a9d #2c3e50; }
+        #filter-bar select:disabled {
+            background-color: #4b5563;
+            color: #d1d5db;
+            opacity: 0.7;
+            cursor: not-allowed;
+            border-color: #6b7280;
+        }
 
-        /* Para asegurar que los widgets de Cesium estén encima de nuestra UI personalizada si es necesario */
-        .cesium-viewer-toolbar {
+        .legend-info-btn {
+            background: none;
+            border: none;
+            color: #9ca3af;
+            cursor: pointer;
+            padding: 0.125rem 0.25rem;
+            margin-left: 0.5rem;
+            display: none;
+            /* Oculto por defecto */
+            line-height: 1;
+        }
+
+        .legend-info-btn:hover {
+            color: #e5e7eb;
+        }
+
+        .legend-info-btn.active {
+            color: #60a5fa;
+        }
+
+        .legend-info-btn i {
+            font-size: 0.875rem;
+        }
+
+        /* Estilos para el contenedor de leyenda individual */
+        .individual-legend-content {
+            display: none;
+            padding: 0.375rem;
+            /* Un padding pequeño (equivale a p-1.5 de Tailwind aprox) */
+            margin-top: 0.25rem;
+            /* mt-1 */
+            background-color: #374151;
+            /* Un poco más oscuro que el fondo del topbar */
+            border-radius: 0.25rem;
+            /* rounded-sm */
+
+            /* --- AJUSTE PRINCIPAL AQUÍ --- */
+            max-height: 150px;
+            /* Altura MÁXIMA para el contenedor. AJUSTA ESTO. */
+            overflow-y: auto;
+            /* Scroll si el contenido (la imagen) es más alto */
+            text-align: center;
+            /* Centrar la imagen si es más estrecha */
+        }
+
+        .individual-legend-content img {
+            max-width: 100%;
+            /* La imagen no será más ancha que su contenedor */
+
+            /* --- AJUSTE PRINCIPAL AQUÍ --- */
+            max-height: 100%;
+            /* La imagen puede ocupar hasta el 100% de la altura de su contenedor (que ya tiene max-height) */
+            /* O puedes poner un valor fijo un poco menor que el max-height del contenedor: ej. max-height: 130px; */
+
+            object-fit: contain;
+            /* Escala la imagen para que quepa DENTRO del contenedor manteniendo proporciones. */
+            /* 'scale-down' también es una opción, se comporta como 'contain' o 'none' (lo que resulte en imagen más pequeña) */
+
+            display: inline-block;
+            /* Para que el text-align:center del padre funcione */
+            background-color: #ffffff;
+            border-radius: 0.125rem;
+            /* No es necesario padding o borde en la imagen misma si el contenedor ya lo maneja o si quieres look limpio */
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #2c3e50;
+            border-radius: 3px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #5b7a9d;
+            border-radius: 3px;
+            border: 1px solid #2c3e50;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background-color: #7492b3;
+        }
+
+        .custom-scrollbar {
+            scrollbar-width: thin;
+            scrollbar-color: #5b7a9d #2c3e50;
+        }
+
+        .cesium-viewer-toolbar,
+        .cesium-viewer-animationContainer,
+        .cesium-viewer-timelineContainer {
             z-index: 101 !important;
         }
-        .cesium-viewer-animationContainer, .cesium-viewer-timelineContainer {
-            z-index: 101 !important;
-        }
-
     </style>
 </head>
+
 <body class="app-container">
 
     <div id="topbar">
@@ -127,84 +205,181 @@
         <div id="titulo" class="mb-3 text-center">
             <h2 class="text-xl font-bold">SIG 3D (Cesium)</h2>
         </div>
+
         <div class="flex-grow overflow-y-auto space-y-1 pr-1 custom-scrollbar">
             <div id="subtitulo-vectorial">
-                <h2 class="text-base font-semibold mb-1 text-gray-200 sticky top-0 bg-[#2c3e50] py-1 z-10">Capas Visibles</h2>
+                <h2 class="text-base font-semibold mb-1 text-gray-200 sticky top-0 bg-[#2c3e50] py-1 z-10">Capas
+                    Visibles</h2>
             </div>
             <div class="layer-group">
-                <label class="flex items-center font-semibold text-sm cursor-pointer hover:bg-gray-700/50 p-1 rounded">
-                    <input type="checkbox" id="toggleCarreteras" class="form-checkbox mr-2 text-blue-500 bg-gray-700 border-gray-600 rounded focus:ring-blue-500"> Carreteras
-                </label>
+                <div class="flex items-center justify-between">
+                    <label
+                        class="flex items-center font-semibold text-sm cursor-pointer hover:bg-gray-700/50 p-1 rounded flex-grow">
+                        <input type="checkbox" id="toggleCarreteras"
+                            class="form-checkbox mr-2 text-blue-500 bg-gray-700 border-gray-600 rounded focus:ring-blue-500">
+                        Carreteras
+                    </label>
+                </div>
+            </div>
+
+            <div class="layer-group">
+                <div class="flex items-center justify-between">
+                    <label
+                        class="flex items-center font-semibold text-sm cursor-pointer hover:bg-gray-700/50 p-1 rounded flex-grow">
+                        <input type="checkbox" id="toggleRios"
+                            class="form-checkbox mr-2 text-blue-500 bg-gray-700 border-gray-600 rounded focus:ring-blue-500">
+                        Ríos y vías de agua
+                    </label>
+                    <button class="legend-info-btn" data-layerkey="rios">
+                        <i class="fas fa-info-circle text-sm"></i>
+                    </button>
+                </div>
+                <div class="individual-legend-content custom-scrollbar" id="legend-content-rios"></div>
+            </div>
+
+            <div class="layer-group">
+                <div class="flex items-center justify-between">
+                    <label
+                        class="flex items-center font-semibold text-sm cursor-pointer hover:bg-gray-700/50 p-1 rounded flex-grow">
+                        <input type="checkbox" id="toggleConstrucciones"
+                            class="form-checkbox mr-2 text-blue-500 bg-gray-700 border-gray-600 rounded focus:ring-blue-500">
+                        Construcciones
+                    </label>
+                </div>
+            </div>
+
+            <div class="layer-group">
+                <div class="flex items-center justify-between">
+                    <label
+                        class="flex items-center font-semibold text-sm cursor-pointer hover:bg-gray-700/50 p-1 rounded flex-grow">
+                        <input type="checkbox" id="toggleDeburga"
+                            class="form-checkbox mr-2 text-blue-500 bg-gray-700 border-gray-600 rounded focus:ring-blue-500">
+                        DEGURBA
+                    </label>
+                    <button class="legend-info-btn" data-layerkey="deburga">
+                        <i class="fas fa-info-circle text-sm"></i>
+                    </button>
+                </div>
+                <div class="individual-legend-content custom-scrollbar" id="legend-content-deburga"></div>
+            </div>
+
+            <div class="layer-group">
+                <div class="flex items-center justify-between">
+                    <label
+                        class="flex items-center font-semibold text-sm cursor-pointer hover:bg-gray-700/50 p-1 rounded flex-grow">
+                        <input type="checkbox" id="toggleCuerpos"
+                            class="form-checkbox mr-2 text-blue-500 bg-gray-700 border-gray-600 rounded focus:ring-blue-500">
+                        Cuerpos de agua
+                    </label>
+                    <button class="legend-info-btn" data-layerkey="cuerposAgua"> <i
+                            class="fas fa-info-circle text-sm"></i>
+                    </button>
+                </div>
+                <div class="individual-legend-content custom-scrollbar" id="legend-content-cuerposAgua"></div>
+            </div>
+
+            <div class="layer-group">
+                <div class="flex items-center justify-between">
+                    <label
+                        class="flex items-center font-semibold text-sm cursor-pointer hover:bg-gray-700/50 p-1 rounded flex-grow">
+                        <input type="checkbox" id="toggleDistrito"
+                            class="form-checkbox mr-2 text-blue-500 bg-gray-700 border-gray-600 rounded focus:ring-blue-500">
+                        Distritos
+                    </label>
+                </div>
             </div>
             <div class="layer-group">
-                <label class="flex items-center font-semibold text-sm cursor-pointer hover:bg-gray-700/50 p-1 rounded">
-                    <input type="checkbox" id="toggleRios" class="form-checkbox mr-2 text-blue-500 bg-gray-700 border-gray-600 rounded focus:ring-blue-500"> Ríos y vías de agua
-                </label>
+                <div class="flex items-center justify-between">
+                    <label
+                        class="flex items-center font-semibold text-sm cursor-pointer hover:bg-gray-700/50 p-1 rounded flex-grow">
+                        <input type="checkbox" id="toggleMunicipios"
+                            class="form-checkbox mr-2 text-blue-500 bg-gray-700 border-gray-600 rounded focus:ring-blue-500">
+                        Municipios
+                    </label>
+                </div>
             </div>
             <div class="layer-group">
-                <label class="flex items-center font-semibold text-sm cursor-pointer hover:bg-gray-700/50 p-1 rounded">
-                    <input type="checkbox" id="toggleConstrucciones" class="form-checkbox mr-2 text-blue-500 bg-gray-700 border-gray-600 rounded focus:ring-blue-500"> Construcciones
-                </label>
+                <div class="flex items-center justify-between">
+                    <label
+                        class="flex items-center font-semibold text-sm cursor-pointer hover:bg-gray-700/50 p-1 rounded flex-grow">
+                        <input type="checkbox" id="toggleDepartamento"
+                            class="form-checkbox mr-2 text-blue-500 bg-gray-700 border-gray-600 rounded focus:ring-blue-500">
+                        Departamentos
+                    </label>
+                </div>
             </div>
-            <div class="layer-group">
-                <label class="flex items-center font-semibold text-sm cursor-pointer hover:bg-gray-700/50 p-1 rounded">
-                    <input type="checkbox" id="toggleDeburga" class="form-checkbox mr-2 text-blue-500 bg-gray-700 border-gray-600 rounded focus:ring-blue-500"> DEGURBA
-                </label>
-            </div>
-            <div class="layer-group">
-                <label class="flex items-center font-semibold text-sm cursor-pointer hover:bg-gray-700/50 p-1 rounded">
-                    <input type="checkbox" id="toggleCuerpos" class="form-checkbox mr-2 text-blue-500 bg-gray-700 border-gray-600 rounded focus:ring-blue-500"> Cuerpos de agua
-                </label>
-            </div>
-            <div class="layer-group">
-                <label class="flex items-center font-semibold text-sm cursor-pointer hover:bg-gray-700/50 p-1 rounded">
-                    <input type="checkbox" id="toggleDistrito" class="form-checkbox mr-2 text-blue-500 bg-gray-700 border-gray-600 rounded focus:ring-blue-500"> Distritos
-                </label>
-            </div>
-            <div class="layer-group">
-                <label class="flex items-center font-semibold text-sm cursor-pointer hover:bg-gray-700/50 p-1 rounded">
-                    <input type="checkbox" id="toggleMunicipios" class="form-checkbox mr-2 text-blue-500 bg-gray-700 border-gray-600 rounded focus:ring-blue-500"> Municipios
-                </label>
-            </div>
-            <div class="layer-group">
-                <label class="flex items-center font-semibold text-sm cursor-pointer hover:bg-gray-700/50 p-1 rounded">
-                    <input type="checkbox" id="toggleDepartamento" class="form-checkbox mr-2 text-blue-500 bg-gray-700 border-gray-600 rounded focus:ring-blue-500"> Departamentos
-                </label>
-            </div>
+
             <hr class="my-2 border-gray-600">
             <div id="subtitulo-raster" class="mt-2">
-                <h2 class="text-base font-semibold mb-1 text-gray-200 sticky top-0 bg-[#2c3e50] py-1 z-10">Capas Ráster</h2>
+                <h2 class="text-base font-semibold mb-1 text-gray-200 sticky top-0 bg-[#2c3e50] py-1 z-10">Capas Ráster
+                </h2>
+            </div>
+
+            <div class="layer-group">
+                <div class="flex items-center justify-between">
+                    <label
+                        class="flex items-center font-semibold text-sm cursor-pointer hover:bg-gray-700/50 p-1 rounded flex-grow">
+                        <input type="checkbox" id="toggleTemperatura"
+                            class="form-checkbox mr-2 text-blue-500 bg-gray-700 border-gray-600 rounded focus:ring-blue-500">
+                        Temperatura (LST)
+                    </label>
+                    <button class="legend-info-btn" data-layerkey="temperatura">
+                        <i class="fas fa-info-circle text-sm"></i>
+                    </button>
+                </div>
+                <div class="individual-legend-content custom-scrollbar" id="legend-content-temperatura"></div>
+            </div>
+
+            <div class="layer-group">
+                <div class="flex items-center justify-between">
+                    <label
+                        class="flex items-center font-semibold text-sm cursor-pointer hover:bg-gray-700/50 p-1 rounded flex-grow">
+                        <input type="checkbox" id="toggleVegetacion"
+                            class="form-checkbox mr-2 text-blue-500 bg-gray-700 border-gray-600 rounded focus:ring-blue-500">
+                        Vegetación (NDVI)
+                    </label>
+                    <button class="legend-info-btn" data-layerkey="vegetacion">
+                        <i class="fas fa-info-circle text-sm"></i>
+                    </button>
+                </div>
+                <div class="individual-legend-content custom-scrollbar" id="legend-content-vegetacion"></div>
+            </div>
+
+            <div class="layer-group">
+                <div class="flex items-center justify-between">
+                    <label
+                        class="flex items-center font-semibold text-sm cursor-pointer hover:bg-gray-700/50 p-1 rounded flex-grow">
+                        <input type="checkbox" id="toggleSuelos"
+                            class="form-checkbox mr-2 text-blue-500 bg-gray-700 border-gray-600 rounded focus:ring-blue-500">
+                        Uso de Suelo
+                    </label>
+                    <button class="legend-info-btn" data-layerkey="suelos">
+                        <i class="fas fa-info-circle text-sm"></i>
+                    </button>
+                </div>
+                <div class="individual-legend-content custom-scrollbar" id="legend-content-suelos"></div>
             </div>
             <div class="layer-group">
-                <label class="flex items-center font-semibold text-sm cursor-pointer hover:bg-gray-700/50 p-1 rounded">
-                    <input type="checkbox" id="toggleTemperatura" class="form-checkbox mr-2 text-blue-500 bg-gray-700 border-gray-600 rounded focus:ring-blue-500"> Temperatura (LST)
-                </label>
-            </div>
-            <div class="layer-group">
-                <label class="flex items-center font-semibold text-sm cursor-pointer hover:bg-gray-700/50 p-1 rounded">
-                    <input type="checkbox" id="toggleVegetacion" class="form-checkbox mr-2 text-blue-500 bg-gray-700 border-gray-600 rounded focus:ring-blue-500"> Vegetación (NDVI)
-                </label>
-            </div>
-            <div class="layer-group">
-                <label class="flex items-center font-semibold text-sm cursor-pointer hover:bg-gray-700/50 p-1 rounded">
-                    <input type="checkbox" id="toggleSuelos" class="form-checkbox mr-2 text-blue-500 bg-gray-700 border-gray-600 rounded focus:ring-blue-500"> Uso de Suelo
-                </label>
-            </div>
-            <div class="layer-group">
-                <label class="flex items-center font-semibold text-sm cursor-pointer hover:bg-gray-700/50 p-1 rounded">
-                    <input type="checkbox" id="toggleSuperficie" class="form-checkbox mr-2 text-blue-500 bg-gray-700 border-gray-600 rounded focus:ring-blue-500"> Superficie
-                </label>
+                <div class="flex items-center justify-between">
+                    <label
+                        class="flex items-center font-semibold text-sm cursor-pointer hover:bg-gray-700/50 p-1 rounded flex-grow">
+                        <input type="checkbox" id="toggleSuperficie"
+                            class="form-checkbox mr-2 text-blue-500 bg-gray-700 border-gray-600 rounded focus:ring-blue-500">
+                        Superficie
+                    </label>
+                </div>
             </div>
         </div>
     </div>
 
     <div class="map-area">
         <div id="cesiumContainer"></div>
-
         <div id="filter-bar">
             <div class="flex flex-col">
-                <label for="departamentoSelectGlobal" class="text-xs font-semibold text-gray-200 mb-0.5">Departamento:</label>
-                <select id="departamentoSelectGlobal" class="form-select p-1.5 border border-gray-400 rounded-md shadow-sm text-xs text-gray-800 bg-white focus:ring-blue-500 focus:border-blue-500 min-w-[150px]">
+                <label for="departamentoSelectGlobal"
+                    class="text-xs font-semibold text-gray-200 mb-0.5">Departamento:</label>
+                <select id="departamentoSelectGlobal"
+                    class="form-select p-1.5 border border-gray-400 rounded-md shadow-sm text-xs text-gray-800 bg-white focus:ring-blue-500 focus:border-blue-500 min-w-[150px]">
                     <option value="">-- Seleccione --</option>
                     <option value="Ahuachapán">Ahuachapán</option>
                     <option value="Santa Ana">Santa Ana</option>
@@ -216,19 +391,22 @@
             </div>
             <div class="flex flex-col">
                 <label for="municipioSelectGlobal" class="text-xs font-semibold text-gray-200 mb-0.5">Municipio:</label>
-                <select id="municipioSelectGlobal" disabled class="form-select p-1.5 border border-gray-400 rounded-md shadow-sm text-xs text-gray-800 bg-gray-100 cursor-not-allowed focus:ring-blue-500 focus:border-blue-500 min-w-[150px]">
+                <select id="municipioSelectGlobal" disabled
+                    class="form-select p-1.5 border border-gray-400 rounded-md shadow-sm text-xs text-gray-800 bg-gray-100 cursor-not-allowed focus:ring-blue-500 focus:border-blue-500 min-w-[150px]">
                     <option value="">-- Seleccione --</option>
                 </select>
             </div>
             <div class="flex flex-col">
                 <label for="distritoSelectGlobal" class="text-xs font-semibold text-gray-200 mb-0.5">Distrito:</label>
-                <select id="distritoSelectGlobal" disabled class="form-select p-1.5 border border-gray-400 rounded-md shadow-sm text-xs text-gray-800 bg-gray-100 cursor-not-allowed focus:ring-blue-500 focus:border-blue-500 min-w-[150px]">
+                <select id="distritoSelectGlobal" disabled
+                    class="form-select p-1.5 border border-gray-400 rounded-md shadow-sm text-xs text-gray-800 bg-gray-100 cursor-not-allowed focus:ring-blue-500 focus:border-blue-500 min-w-[150px]">
                     <option value="">-- Seleccione --</option>
                 </select>
             </div>
             <div class="flex flex-col">
                 <label for="deburgaSelectGlobal" class="text-xs font-semibold text-gray-200 mb-0.5">DEGURBA:</label>
-                <select id="deburgaSelectGlobal" class="form-select p-1.5 border border-gray-400 rounded-md shadow-sm text-xs text-gray-800 bg-white focus:ring-blue-500 focus:border-blue-500 min-w-[150px]">
+                <select id="deburgaSelectGlobal"
+                    class="form-select p-1.5 border border-gray-400 rounded-md shadow-sm text-xs text-gray-800 bg-white focus:ring-blue-500 focus:border-blue-500 min-w-[150px]">
                     <option value="">-- Todas --</option>
                     <option value="Ciudades">Ciudades</option>
                     <option value="Zonas rurales">Zonas rurales</option>
@@ -236,15 +414,12 @@
                     <option value="Zonas suburbanas o periurbanas">Zonas suburbanas o periurbanas</option>
                 </select>
             </div>
-            <button id="resetFiltersButton" class="self-end p-1.5 bg-red-500 text-white rounded-md hover:bg-red-600 text-xs h-fit">Limpiar</button>
-        </div>
-
-        <div id="legend-panel" style="display: none;"> <h2 class="text-base font-semibold mb-1.5 pb-1 border-b border-white/40">Leyenda</h2>
-            <div id="legend-content" class="space-y-3 custom-scrollbar overflow-y-auto">
-                </div>
+            <button id="resetFiltersButton"
+                class="self-end p-1.5 bg-red-500 text-white rounded-md hover:bg-red-600 text-xs h-fit">Limpiar</button>
         </div>
     </div>
 
     <script src="js/cesium.js"></script>
 </body>
+
 </html>

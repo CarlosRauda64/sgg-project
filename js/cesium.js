@@ -1,4 +1,4 @@
-// js/script_cesium.js
+// js/cesium.js
 
 // --- Configuración del Token de Cesium Ion ---
 Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI0NDRkNWVhNy0zZDUzLTRhMjctODM2Yy1mOGRiMjQwMzllNzEiLCJpZCI6MzAxNTU3LCJpYXQiOjE3NDcwMTE4MDF9.yJhtoi6X8NYz8YGp_79DMymdNxXpt7UIbQet3bwUNSY'; // ¡¡¡REEMPLAZA CON TU TOKEN!!!
@@ -6,8 +6,6 @@ Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOi
 // --- Constantes Globales ---
 const geoServerWorkspace = 'SGG'; // Tu workspace de GeoServer
 const geoServerWmsUrl = `https://geo.sggproject.me/geoserver/${geoServerWorkspace}/wms`; // URL para WMS
-// const geoServerOwsUrl = 'http://localhost:8080/geoserver/ows'; // Si necesitas la base OWS para algo más
-// const geoServerWfsUrl = `http://localhost:8080/geoserver/${geoServerWorkspace}/ows`; // Para WFS
 
 const divisionesAdministrativas = { // Tu estructura de divisiones
     "Ahuachapán": { municipios: { "Ahuachapán Centro": ["Ahuachapán", "Apaneca", "Concepción de Ataco", "Tacuba"], "Ahuachapán Norte": ["Atiquizaya", "El Refugio", "San Lorenzo", "Turín"], "Ahuachapán Sur": ["Guaymango", "Jujutla", "San Francisco Menéndez", "San Pedro Puxtla"]}},
@@ -24,37 +22,24 @@ const municipioSelectGlobal = document.getElementById('municipioSelectGlobal');
 const distritoSelectGlobal = document.getElementById('distritoSelectGlobal');
 const deburgaSelectGlobal = document.getElementById('deburgaSelectGlobal');
 const resetFiltersButton = document.getElementById('resetFiltersButton');
-const legendContentElement = document.getElementById('legend-content');
-const legendPanelElement = document.getElementById('legend-panel');
 
 // --- Definición de Capas para CesiumJS ---
-// Usaremos los nombres de capa de tu GeoServer (ej. SGG:Uso de Suelo)
-// Almacenaremos la instancia de Cesium.ImageryLayer y el filtro CQL actual.
 const cesiumLayersConfig = {
-    superficie:    { name: `${geoServerWorkspace}:superficie`,    title: 'Superficie',       imageryLayer: null, toggleId: 'toggleSuperficie',   currentFilter: "INCLUDE", type: 'raster' },
-    suelos:        { name: `${geoServerWorkspace}:Uso de Suelo`,  title: 'Uso de Suelo',     imageryLayer: null, toggleId: 'toggleSuelos',       currentFilter: "INCLUDE", type: 'raster', legend: true }, // SGG:Uso de Suelo según tu captura
-    vegetacion:    { name: `${geoServerWorkspace}:vegetacion`,    title: 'Vegetación (NDVI)',imageryLayer: null, toggleId: 'toggleVegetacion',   currentFilter: "INCLUDE", type: 'raster', legend: true },
-    temperatura:   { name: `${geoServerWorkspace}:temperatura`,   title: 'Temperatura (LST)',imageryLayer: null, toggleId: 'toggleTemperatura',  currentFilter: "INCLUDE", type: 'raster', legend: true },
-    departamento:  { name: `${geoServerWorkspace}:departamento`,  title: 'Departamentos',    imageryLayer: null, toggleId: 'toggleDepartamento', filterField: 'adm1_es', currentFilter: "INCLUDE", type: 'vector' },
-    municipios:    { name: `${geoServerWorkspace}:municipio`,     title: 'Municipios',       imageryLayer: null, toggleId: 'toggleMunicipios',   filterField: 'adm2_es', currentFilter: "INCLUDE", type: 'vector' },
-    distrito:      { name: `${geoServerWorkspace}:distrito`,      title: 'Distritos',        imageryLayer: null, toggleId: 'toggleDistrito',     filterField: 'adm3_es', currentFilter: "INCLUDE", type: 'vector' },
-    cuerposAgua:   { name: `${geoServerWorkspace}:cuerposAgua`,   title: 'Cuerpos de Agua',  imageryLayer: null, toggleId: 'toggleCuerpos',      currentFilter: "INCLUDE", type: 'vector', legend: true },
-    deburga:       { name: `${geoServerWorkspace}:deburga`,       title: 'DEGURBA',          imageryLayer: null, toggleId: 'toggleDeburga',      filterField: 'class',   currentFilter: "INCLUDE", type: 'vector', legend: true },
-    construcciones:{ name: `${geoServerWorkspace}:construcciones`,title: 'Construcciones',   imageryLayer: null, toggleId: 'toggleConstrucciones',currentFilter: "INCLUDE", type: 'vector' },
-    rios:          { name: `${geoServerWorkspace}:rios`,          title: 'Ríos',             imageryLayer: null, toggleId: 'toggleRios',         currentFilter: "INCLUDE", type: 'vector', legend: true },
-    carreteras:    { name: `${geoServerWorkspace}:carreteras`,    title: 'Carreteras',       imageryLayer: null, toggleId: 'toggleCarreteras',   currentFilter: "INCLUDE", type: 'vector' }
+    superficie:     { name: `${geoServerWorkspace}:superficie`,     title: 'Superficie',        imageryLayer: null, toggleId: 'toggleSuperficie',   currentFilter: "INCLUDE", type: 'raster', legend: false },
+    suelos:         { name: `${geoServerWorkspace}:Uso de Suelo`,   title: 'Uso de Suelo',      imageryLayer: null, toggleId: 'toggleSuelos',       currentFilter: "INCLUDE", type: 'raster', legend: true },
+    vegetacion:     { name: `${geoServerWorkspace}:vegetacion`,     title: 'Vegetación (NDVI)', imageryLayer: null, toggleId: 'toggleVegetacion',   currentFilter: "INCLUDE", type: 'raster', legend: true },
+    temperatura:    { name: `${geoServerWorkspace}:temperatura`,    title: 'Temperatura (LST)', imageryLayer: null, toggleId: 'toggleTemperatura',  currentFilter: "INCLUDE", type: 'raster', legend: true },
+    departamento:   { name: `${geoServerWorkspace}:departamento`,   title: 'Departamentos',     imageryLayer: null, toggleId: 'toggleDepartamento', filterField: 'adm1_es', currentFilter: "INCLUDE", type: 'vector', legend: false },
+    municipios:     { name: `${geoServerWorkspace}:municipio`,      title: 'Municipios',        imageryLayer: null, toggleId: 'toggleMunicipios',   filterField: 'adm2_es', currentFilter: "INCLUDE", type: 'vector', legend: false },
+    distrito:       { name: `${geoServerWorkspace}:distrito`,       title: 'Distritos',         imageryLayer: null, toggleId: 'toggleDistrito',     filterField: 'adm3_es', currentFilter: "INCLUDE", type: 'vector', legend: false },
+    cuerposAgua:    { name: `${geoServerWorkspace}:cuerposAgua`,    title: 'Cuerpos de Agua',   imageryLayer: null, toggleId: 'toggleCuerpos',      currentFilter: "INCLUDE", type: 'vector', legend: true },
+    deburga:        { name: `${geoServerWorkspace}:deburga`,        title: 'DEGURBA',           imageryLayer: null, toggleId: 'toggleDeburga',      filterField: 'class',   currentFilter: "INCLUDE", type: 'vector', legend: true },
+    construcciones: { name: `${geoServerWorkspace}:construcciones`, title: 'Construcciones',    imageryLayer: null, toggleId: 'toggleConstrucciones',currentFilter: "INCLUDE", type: 'vector', legend: false },
+    rios:           { name: `${geoServerWorkspace}:rios`,           title: 'Ríos',              imageryLayer: null, toggleId: 'toggleRios',         currentFilter: "INCLUDE", type: 'vector', legend: true },
+    carreteras:     { name: `${geoServerWorkspace}:carreteras`,     title: 'Carreteras',        imageryLayer: null, toggleId: 'toggleCarreteras',   currentFilter: "INCLUDE", type: 'vector', legend: false }
 };
-// Mapeo para la leyenda (basado en toggleId para simplificar)
-const legendMap = {};
-for (const key in cesiumLayersConfig) {
-    if (cesiumLayersConfig[key].legend) {
-        legendMap[cesiumLayersConfig[key].toggleId] = cesiumLayersConfig[key].name;
-    }
-}
 
 let viewer; // Variable global para el visor de Cesium
-
-// --- Funciones Principales de Cesium y Lógica de la Aplicación ---
 
 async function initializeCesiumApp() {
     let terrainProviderInstance;
@@ -77,10 +62,9 @@ async function initializeCesiumApp() {
             homeButton: true,
             sceneModePicker: true,
             baseLayerPicker: true,
-            geocoder: false, // Puedes habilitarlo si lo deseas
+            geocoder: false,
             navigationHelpButton: false,
-            infoBox: true, // Habilitar InfoBox para GetFeatureInfo en WMS
-            // selectionIndicator: true // Muestra un indicador visual al seleccionar
+            infoBox: true,
         });
         console.log("Visor de CesiumJS inicializado.");
 
@@ -89,25 +73,16 @@ async function initializeCesiumApp() {
             orientation: { heading: Cesium.Math.toRadians(0.0), pitch: Cesium.Math.toRadians(-45.0), roll: 0.0 }
         });
 
-        // Habilitar GetFeatureInfo para WMS
-        // CesiumJS maneja esto automáticamente si 'enablePickFeatures: true' está en el WMS provider
-        // y el InfoBox está visible.
-
     } catch (viewerError) {
         console.error("Error al inicializar el Cesium.Viewer:", viewerError);
         alert("Error crítico al inicializar el visor de Cesium. Revisa la consola.");
-        return; // Salir si el visor no se puede crear
+        return;
     }
 
-    // Configurar listeners de UI y carga inicial de capas (si alguna está pre-marcada)
     setupEventListeners();
-    applyInitialLayerVisibility(); // Carga las capas que estén marcadas al inicio
-    updateLegend(); // Actualiza la leyenda por si hay capas visibles
+    applyInitialLayerVisibility();
 }
 
-/**
- * Crea y devuelve un ImageryProvider de WMS para Cesium.
- */
 function createWMSImageryProvider(layerName, cqlFilter = "INCLUDE") {
     return new Cesium.WebMapServiceImageryProvider({
         url: geoServerWmsUrl,
@@ -116,23 +91,18 @@ function createWMSImageryProvider(layerName, cqlFilter = "INCLUDE") {
             transparent: true,
             format: 'image/png',
             CQL_FILTER: cqlFilter,
-            VERSION: '1.1.1', // O 1.3.0 si prefieres
-            // STYLES: '', // Puedes especificar estilos aquí si los tienes en GeoServer
-            // TILED: true, // Considera usarlo para mejor rendimiento con GeoServer
+            VERSION: '1.1.1',
         },
-        enablePickFeatures: true // Importante para GetFeatureInfo
+        enablePickFeatures: true
     });
 }
 
-/**
- * Actualiza (añade/remueve/re-filtra) una capa WMS en el visor.
- */
 function refreshCesiumWMSLayer(layerKey, isVisible, newCqlFilter) {
     const layerConfig = cesiumLayersConfig[layerKey];
     if (!layerConfig) return;
 
     if (layerConfig.imageryLayer) {
-        viewer.imageryLayers.remove(layerConfig.imageryLayer, true); // true para destruir el proveedor
+        viewer.imageryLayers.remove(layerConfig.imageryLayer, true);
         layerConfig.imageryLayer = null;
     }
 
@@ -143,49 +113,125 @@ function refreshCesiumWMSLayer(layerKey, isVisible, newCqlFilter) {
     if (isVisible) {
         const provider = createWMSImageryProvider(layerConfig.name, layerConfig.currentFilter);
         layerConfig.imageryLayer = viewer.imageryLayers.addImageryProvider(provider);
-
-        // Ajustar orden si es necesario (ejemplo básico, el último añadido está encima)
-        // Si tienes un orden específico, necesitarías lógica adicional aquí.
-        // viewer.imageryLayers.raiseToTop(layerConfig.imageryLayer);
     }
 }
 
 /**
- * Configura los event listeners para los controles de la UI.
+ * Obtiene y muestra la leyenda para una capa específica usando LEGEND_OPTIONS.
  */
+function displayIndividualLayerLegend(layerKey) {
+    const config = cesiumLayersConfig[layerKey];
+    const legendContentDiv = document.getElementById(`legend-content-${layerKey}`);
+
+    if (!config || !legendContentDiv || !config.legend) {
+        if (legendContentDiv) legendContentDiv.innerHTML = '';
+        return;
+    }
+
+    legendContentDiv.innerHTML = '<p class="text-xs text-gray-400 italic">Cargando leyenda...</p>';
+
+    const layerName = config.name;
+
+    // --- Configuración de LEGEND_OPTIONS y tamaño de imagen ---
+    let legendOptionsArray = [
+        "fontName:SansSerif", // GeoServer puede tener alias como 'SansSerif', 'Serif', 'Monospaced'
+        "fontSize:15",        // Reducir tamaño de fuente. Prueba con 8, 9, 10.
+        "fontAntiAliasing:true",
+        // "fontStyle:bold", // Opcional
+        // "fontColor:0x333333", // Opcional: color de fuente en hexadecimal
+        "forceLabels:on",
+        "labelMargin:3",      // Margen entre el gráfico y la etiqueta (reducido)
+        "dx:0.1",             // Espaciado horizontal general (reducido)
+        "dy:0.1",             // Espaciado vertical general (reducido)
+        "mx:0.1",             // Margen horizontal entre elementos de leyenda (reducido)
+        "my:0.1",             // Margen vertical entre elementos de leyenda (reducido)
+        "border:false",       // Quitar borde alrededor de la leyenda completa
+        "borderColor:0x000000",
+        "borderWidth:0",
+        "dpi:91", // Ligeramente mayor DPI para posible mejora de nitidez en texto pequeño
+        "rowwidth:10", // Si tienes items muy anchos y quieres forzar que se acorten.
+    ];
+
+    // Opciones específicas por tipo de capa o capa individual si es necesario
+    if (config.type === 'raster') { // Para LST, NDVI
+        legendOptionsArray.push("item뮐านา:false", "fontSize:20"); // Para rásters, a veces se añaden items extra no deseados
+        
+    }
+    
+
+
+    const legendOptionsString = legendOptionsArray.join(';');
+
+    const imageWidth = 100; // Ancho deseado para la imagen de leyenda (más estrecho)
+    const imageHeight = "";   // Dejar vacío para que GeoServer calcule la altura basado en contenido y otras opciones
+
+    const legendUrl = `${geoServerWmsUrl}?REQUEST=GetLegendGraphic&VERSION=1.1.0&FORMAT=image/png&LAYER=${layerName}&STYLE=` +
+                      `&WIDTH=${imageWidth}` +
+                      (imageHeight ? `&HEIGHT=${imageHeight}` : '') +
+                      `&LEGEND_OPTIONS=${encodeURIComponent(legendOptionsString)}`;
+
+    console.log(`Legend URL for ${layerKey}:`, legendUrl); // Para depuración
+
+    const img = document.createElement('img');
+    img.src = legendUrl;
+    img.alt = `Leyenda ${config.title}`;
+    // Los estilos de la imagen (max-width, max-height, object-fit) se manejan por CSS en index.html
+
+    img.onload = function() {
+        legendContentDiv.innerHTML = '';
+        legendContentDiv.appendChild(img);
+    };
+    img.onerror = function() {
+        console.error(`Error al cargar la leyenda para: ${layerName} desde ${legendUrl}`);
+        legendContentDiv.innerHTML = `<p class="text-xs text-red-400 italic">Leyenda no disponible para ${config.title}.</p>`;
+    };
+}
+
+
 function setupEventListeners() {
-    // Listeners para los checkboxes de las capas
     for (const key in cesiumLayersConfig) {
         const config = cesiumLayersConfig[key];
-        const toggle = document.getElementById(config.toggleId);
-        if (toggle) {
-            toggle.addEventListener('change', (event) => {
-                refreshCesiumWMSLayer(key, event.target.checked);
-                if (config.type === 'raster' || config.legend) { // Actualizar leyenda si es raster o tiene leyenda definida
-                     // La función manejarActivacionRaster se encargará de la lógica de exclusividad de los rásters temáticos
-                    if (config.type === 'raster' && ['temperatura', 'vegetacion', 'suelos'].includes(key)) {
-                         manejarActivacionRaster(key, event.target.checked);
-                    } else {
-                        updateLegend();
+        const toggleCheckbox = document.getElementById(config.toggleId);
+        const legendInfoButton = document.querySelector(`.legend-info-btn[data-layerkey="${key}"]`);
+        const legendContentDiv = document.getElementById(`legend-content-${key}`);
+
+        if (toggleCheckbox) {
+            toggleCheckbox.addEventListener('change', (event) => {
+                const isChecked = event.target.checked;
+                refreshCesiumWMSLayer(key, isChecked);
+
+                if (config.legend && legendInfoButton) {
+                    legendInfoButton.style.display = isChecked ? 'inline-block' : 'none';
+                    if (!isChecked && legendContentDiv) {
+                        legendContentDiv.style.display = 'none';
+                        legendContentDiv.innerHTML = ''; // Limpiar contenido al ocultar
+                        legendInfoButton.classList.remove('active');
                     }
                 }
-                 // Si es una capa base raster como 'superficie', su visibilidad puede depender de otras
-                if (key === 'superficie' && config.type === 'raster') {
-                    const algunaTematicaActiva = ['temperatura', 'vegetacion', 'suelos'].some(k => {
-                        const chk = document.getElementById(cesiumLayersConfig[k]?.toggleId);
-                        return chk && chk.checked;
-                    });
-                    if (!event.target.checked && algunaTematicaActiva) {
-                        // Si se desmarca 'superficie' pero hay una temática activa, forzar 'superficie' a activo.
-                        // Esto es un poco complejo, la lógica de manejarActivacionRaster debe ser robusta.
-                        // Por ahora, solo actualizamos leyenda. La lógica de dependencia se hará en manejarActivacionRaster.
-                    }
+
+                if (config.type === 'raster' && ['temperatura', 'vegetacion', 'suelos'].includes(key)) {
+                    manejarActivacionRaster(key, isChecked);
+                }
+            });
+        }
+
+        if (config.legend && legendInfoButton && legendContentDiv) {
+            legendInfoButton.addEventListener('click', () => {
+                const isLegendVisible = legendContentDiv.style.display === 'block';
+                if (isLegendVisible) {
+                    legendContentDiv.style.display = 'none';
+                    legendInfoButton.classList.remove('active');
+                    // No es necesario limpiar el contenido aquí, se recargará si se vuelve a abrir.
+                } else {
+                    legendContentDiv.style.display = 'block';
+                    legendInfoButton.classList.add('active');
+                    // Cargar la leyenda. Se recargará cada vez que se abra para reflejar cambios de estilo/opciones.
+                    displayIndividualLayerLegend(key);
                 }
             });
         }
     }
 
-    // Listeners para los selectores de filtro
     if (departamentoSelectGlobal) {
         departamentoSelectGlobal.addEventListener('change', function() {
             populateMunicipioSelect(this.value);
@@ -198,32 +244,31 @@ function setupEventListeners() {
             applyAllFilters();
         });
     }
-    if (distritoSelectGlobal) {
-        distritoSelectGlobal.addEventListener('change', applyAllFilters);
-    }
-    if (deburgaSelectGlobal) {
-        deburgaSelectGlobal.addEventListener('change', applyAllFilters);
-    }
-    if (resetFiltersButton) {
-        resetFiltersButton.addEventListener('click', resetAllFilters);
-    }
+    if (distritoSelectGlobal) distritoSelectGlobal.addEventListener('change', applyAllFilters);
+    if (deburgaSelectGlobal) deburgaSelectGlobal.addEventListener('change', applyAllFilters);
+    if (resetFiltersButton) resetFiltersButton.addEventListener('click', resetAllFilters);
 }
 
-/**
- * Aplica la visibilidad inicial de las capas basada en los checkboxes.
- */
 function applyInitialLayerVisibility() {
     for (const key in cesiumLayersConfig) {
         const config = cesiumLayersConfig[key];
-        const toggle = document.getElementById(config.toggleId);
-        if (toggle && toggle.checked) {
+        const toggleCheckbox = document.getElementById(config.toggleId);
+        const legendInfoButton = document.querySelector(`.legend-info-btn[data-layerkey="${key}"]`);
+
+        if (toggleCheckbox && toggleCheckbox.checked) {
             refreshCesiumWMSLayer(key, true);
+            if (config.legend && legendInfoButton) {
+                legendInfoButton.style.display = 'inline-block';
+            }
+        } else {
+             if (config.legend && legendInfoButton) {
+                legendInfoButton.style.display = 'none';
+            }
         }
     }
-    manejarActivacionRaster(null, false); // Ejecutar una vez para establecer estado inicial de rasters
+    manejarActivacionRaster(null, false);
 }
 
-// --- Funciones de Filtro (adaptadas de tu script original) ---
 function populateMunicipioSelect(departamentoNombre) {
     municipioSelectGlobal.innerHTML = '<option value="">-- Seleccione --</option>';
     distritoSelectGlobal.innerHTML = '<option value="">-- Seleccione --</option>';
@@ -282,56 +327,48 @@ function applyAllFilters() {
     const disSelected = distritoSelectGlobal.value;
     const debSelected = deburgaSelectGlobal.value;
 
-    // Filtro para Departamento
     if (cesiumLayersConfig.departamento) {
         const cqlDep = depSelected ? `${cesiumLayersConfig.departamento.filterField} = '${depSelected}'` : "INCLUDE";
         const chkDep = document.getElementById(cesiumLayersConfig.departamento.toggleId);
         refreshCesiumWMSLayer('departamento', chkDep ? chkDep.checked : false, cqlDep);
     }
-
-    // Filtro para Municipios
     if (cesiumLayersConfig.municipios) {
         let cqlMun = "INCLUDE";
         if (depSelected) {
-            cqlMun = `${cesiumLayersConfig.municipios.filterField} LIKE '${depSelected}%'`; // Asumiendo que adm2_es empieza con el depto o similar
-                                                                                           // O si el campo es solo el nombre del municipio:
-            cqlMun = `adm1_es = '${depSelected}'`; // Necesitas un campo de departamento en la capa municipio
-            if (munSelected) {
-                cqlMun += ` AND ${cesiumLayersConfig.municipios.filterField} = '${munSelected}'`;
-            }
+            cqlMun = `adm1_es = '${depSelected}'`; 
+            if (munSelected) cqlMun += ` AND ${cesiumLayersConfig.municipios.filterField} = '${munSelected}'`;
         }
         const chkMun = document.getElementById(cesiumLayersConfig.municipios.toggleId);
         refreshCesiumWMSLayer('municipios', chkMun ? chkMun.checked : false, cqlMun);
     }
-    
-    // Filtro para Distritos
     if (cesiumLayersConfig.distrito) {
         let cqlDis = "INCLUDE";
-        if (depSelected) { // Asumiendo estructura jerárquica en los datos o campos adecuados
+        if (depSelected) {
             cqlDis = `adm1_es = '${depSelected}'`;
             if (munSelected) {
                 cqlDis += ` AND adm2_es = '${munSelected}'`;
-                if (disSelected) {
-                    cqlDis += ` AND ${cesiumLayersConfig.distrito.filterField} = '${disSelected}'`;
-                }
+                if (disSelected) cqlDis += ` AND ${cesiumLayersConfig.distrito.filterField} = '${disSelected}'`;
             }
         }
         const chkDis = document.getElementById(cesiumLayersConfig.distrito.toggleId);
         refreshCesiumWMSLayer('distrito', chkDis ? chkDis.checked : false, cqlDis);
     }
-
-    // Filtro para Deburga
     if (cesiumLayersConfig.deburga) {
         const cqlDeb = debSelected ? `${cesiumLayersConfig.deburga.filterField} = '${debSelected}'` : "INCLUDE";
         const chkDeb = document.getElementById(cesiumLayersConfig.deburga.toggleId);
         refreshCesiumWMSLayer('deburga', chkDeb ? chkDeb.checked : false, cqlDeb);
+        // Si la leyenda de deburga está abierta, podríamos forzar su recarga aquí,
+        // pero como GetLegendGraphic no toma CQL_FILTER, no debería cambiar.
+        // const legendContentDiv = document.getElementById(`legend-content-deburga`);
+        // if (chkDeb && chkDeb.checked && legendContentDiv && legendContentDiv.style.display === 'block') {
+        //    displayIndividualLayerLegend('deburga');
+        // }
     }
-    updateLegend(); // Actualizar leyenda después de aplicar filtros
 }
 
 function resetAllFilters() {
     if (departamentoSelectGlobal) departamentoSelectGlobal.value = "";
-    populateMunicipioSelect(""); // Esto también limpia y deshabilita distritos
+    populateMunicipioSelect(""); 
     if (deburgaSelectGlobal) deburgaSelectGlobal.value = "";
 
     ['departamento', 'municipios', 'distrito', 'deburga'].forEach(key => {
@@ -340,62 +377,14 @@ function resetAllFilters() {
             refreshCesiumWMSLayer(key, chk ? chk.checked : false, "INCLUDE");
         }
     });
-
-    // Considerar si se debe hacer zoom a la vista inicial de El Salvador
+    
     viewer.camera.flyTo({
         destination: Cesium.Cartesian3.fromDegrees(-89.2182, 13.6929, 400000),
         orientation: { heading: Cesium.Math.toRadians(0.0), pitch: Cesium.Math.toRadians(-45.0), roll: 0.0 }
     });
-    updateLegend();
 }
 
-
-// --- Lógica de Leyenda ---
-function updateLegend() {
-    if (!legendContentElement || !legendPanelElement) return;
-    legendContentElement.innerHTML = '';
-    let legendHasContent = false;
-
-    for (const toggleId in legendMap) {
-        const checkbox = document.getElementById(toggleId);
-        if (checkbox && checkbox.checked) {
-            legendHasContent = true;
-            const layerName = legendMap[toggleId]; // Nombre completo de la capa: SGG:nombre
-            const layerConfigKey = Object.keys(cesiumLayersConfig).find(k => cesiumLayersConfig[k].toggleId === toggleId);
-            const layerTitle = layerConfigKey ? cesiumLayersConfig[layerConfigKey].title : toggleId.replace('toggle','');
-
-
-            const entry = document.createElement('div');
-            const titleEl = document.createElement('h3');
-            titleEl.textContent = layerTitle;
-            titleEl.className = 'text-sm font-semibold text-gray-100 mb-1';
-            
-            const img = document.createElement('img');
-            // Asegurar que la URL base para GetLegendGraphic es correcta
-            // geoServerWmsUrl ya incluye el workspace, así que no es necesario añadirlo de nuevo
-            const legendUrl = `${geoServerWmsUrl}?REQUEST=GetLegendGraphic&VERSION=1.1.0&FORMAT=image/png&LAYER=${layerName}&STYLE=`;
-            
-            img.src = legendUrl;
-            img.alt = `Leyenda ${layerTitle}`;
-            img.className = 'max-w-full rounded bg-white p-1 border border-gray-400 shadow-sm';
-            img.onerror = function() {
-                console.error(`Error al cargar la leyenda para: ${layerName} desde ${legendUrl}`);
-                const errorText = document.createElement('p');
-                errorText.textContent = `Leyenda no disponible para ${layerTitle}.`;
-                errorText.className = 'text-xs text-red-300 italic';
-                if(img.parentNode) { img.parentNode.replaceChild(errorText, img); } 
-                else { entry.appendChild(errorText); }
-            };
-            entry.appendChild(titleEl);
-            entry.appendChild(img);
-            legendContentElement.appendChild(entry);
-        }
-    }
-    legendPanelElement.style.display = legendHasContent ? 'block' : 'none';
-}
-
-// --- Lógica para manejo de capas Raster Temáticas ---
-let activeRasterLayerKey = null; // Para rastrear la capa raster temática activa
+let activeRasterLayerKey = null;
 const thematicRasterKeys = ['temperatura', 'vegetacion', 'suelos'];
 
 function manejarActivacionRaster(changedLayerKey, isChecked) {
@@ -403,26 +392,31 @@ function manejarActivacionRaster(changedLayerKey, isChecked) {
 
     if (changedLayerKey && thematicRasterKeys.includes(changedLayerKey)) {
         if (isChecked) {
-            // Si se activa una capa temática, desactivar otras temáticas
             thematicRasterKeys.forEach(key => {
                 if (key !== changedLayerKey) {
                     const chk = document.getElementById(cesiumLayersConfig[key].toggleId);
                     if (chk && chk.checked) {
                         chk.checked = false;
                         refreshCesiumWMSLayer(key, false);
+                        const legendBtn = document.querySelector(`.legend-info-btn[data-layerkey="${key}"]`);
+                        const legendDiv = document.getElementById(`legend-content-${key}`);
+                        if (legendBtn) legendBtn.style.display = 'none';
+                        if (legendDiv) {
+                            legendDiv.style.display = 'none';
+                            legendDiv.innerHTML = ''; // Limpiar
+                        }
+                        if (legendBtn) legendBtn.classList.remove('active');
                     }
                 }
             });
             activeRasterLayerKey = changedLayerKey;
-            // Activar 'superficie' si no está activa
             if (superficieChk && !superficieChk.checked) {
                 superficieChk.checked = true;
                 refreshCesiumWMSLayer('superficie', true);
             }
-        } else { // Si se desactiva la capa temática que estaba activa
+        } else {
             if (activeRasterLayerKey === changedLayerKey) {
                 activeRasterLayerKey = null;
-                // Si no hay otra temática activa, desactivar 'superficie'
                 const algunaOtraTematicaActiva = thematicRasterKeys.some(key => {
                     const chk = document.getElementById(cesiumLayersConfig[key].toggleId);
                     return chk && chk.checked;
@@ -434,16 +428,11 @@ function manejarActivacionRaster(changedLayerKey, isChecked) {
             }
         }
     } else if (changedLayerKey === 'superficie') {
-        // Si se intenta desactivar 'superficie' mientras una temática está activa, prevenirlo
         if (!isChecked && activeRasterLayerKey) {
             if (superficieChk) superficieChk.checked = true; // Forzar a que siga activa
-            // No es necesario llamar a refreshCesiumWMSLayer para superficie porque no cambió su estado real.
             alert("La capa 'Superficie' es necesaria mientras una capa ráster temática (Temperatura, Vegetación, Uso de Suelo) esté activa.");
         }
     }
-    updateLegend();
 }
 
-
-// --- Inicialización de la aplicación ---
 document.addEventListener('DOMContentLoaded', initializeCesiumApp);
