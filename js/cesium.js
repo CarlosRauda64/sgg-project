@@ -4,12 +4,39 @@
 Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI0NDRkNWVhNy0zZDUzLTRhMjctODM2Yy1mOGRiMjQwMzllNzEiLCJpZCI6MzAxNTU3LCJpYXQiOjE3NDcwMTE4MDF9.yJhtoi6X8NYz8YGp_79DMymdNxXpt7UIbQet3bwUNSY';
 
 // --- Constantes Globales ---
-const geoServerWorkspace = 'SGG'; // Tu workspace de GeoServer
-const geoServerWmsUrl = `https://geo.sggproject.me/geoserver/${geoServerWorkspace}/wms`; // URL para WMS
+const geoServerWorkspace = 'SGG'; 
+const geoServerWmsUrl = `https://geo.sggproject.me/geoserver/${geoServerWorkspace}/wms`; 
 
-// Coordenadas aproximadas para el bounding box de El Salvador
-// [oeste, sur, este, norte]
 const elSalvadorBoundingBox = [-90.15, 13.10, -87.60, 14.50]; 
+
+// Vista Home para 2D (vista cenital del rectángulo)
+const vistaHome2D_ElSalvador = Cesium.Rectangle.fromDegrees(
+    elSalvadorBoundingBox[0], 
+    elSalvadorBoundingBox[1], 
+    elSalvadorBoundingBox[2], 
+    elSalvadorBoundingBox[3]
+);
+
+// Vista Home para 3D y Columbus View (con inclinación)
+// Ajusta puntoDestinoLatCamara3D y altitudVistaHome3D según tus pruebas para el mejor encuadre
+const puntoDestinoLonCamara3D = -88.95; 
+const puntoDestinoLatCamara3D = 13.794185 - 1.5; // Ejemplo: Latitud desplazada al norte (experimenta con 0.3, 0.5, 0.7, etc.)
+const altitudVistaHome3D = 145000; // Experimenta con la altitud
+const orientacionVistaHome3D = {
+    heading: Cesium.Math.toRadians(0.0),   
+    pitch: Cesium.Math.toRadians(-40.0), // Experimenta con la inclinación
+    roll: 0.0
+};
+const vistaHome3D_ElSalvador = {
+    destination: Cesium.Cartesian3.fromDegrees(
+        puntoDestinoLonCamara3D, 
+        puntoDestinoLatCamara3D,
+        altitudVistaHome3D 
+    ),
+    orientation: orientacionVistaHome3D,
+    duration: 1.5 
+};
+
 
 const divisionesAdministrativas = {
     "Ahuachapán": { municipios: { "Ahuachapán Centro": ["Ahuachapán", "Apaneca", "Concepción de Ataco", "Tacuba"], "Ahuachapán Norte": ["Atiquizaya", "El Refugio", "San Lorenzo", "Turín"], "Ahuachapán Sur": ["Guaymango", "Jujutla", "San Francisco Menéndez", "San Pedro Puxtla"] } },
@@ -20,156 +47,45 @@ const divisionesAdministrativas = {
     "San Miguel": { municipios: { "San Miguel Centro": ["Chirilagua", "Comacarán", "Moncagua", "Quelepa", "San Miguel", "Uluazapa"], "San Miguel Norte": ["Carolina", "Chapeltique", "Ciudad Barrios", "Nuevo Edén de San Juan", "San Antonio", "San Gerardo", "San Luis de la Reina", "Sesori"], "San Miguel Oeste": ["Chinameca", "El Tránsito", "Lolotique", "Nueva Guadalupe", "San Jorge", "San Rafael"] } }
 };
 
-// Referencias a Elementos del DOM
 const departamentoSelectGlobal = document.getElementById('departamentoSelectGlobal');
 const municipioSelectGlobal = document.getElementById('municipioSelectGlobal');
 const distritoSelectGlobal = document.getElementById('distritoSelectGlobal');
 const deburgaSelectGlobal = document.getElementById('deburgaSelectGlobal');
 const resetFiltersButton = document.getElementById('resetFiltersButton');
 
-// --- Definición de Capas para CesiumJS con zIndex ---
 const cesiumLayersConfig = {
     superficie: { name: `${geoServerWorkspace}:superficie`, title: 'Superficie', imageryLayer: null, toggleId: 'toggleSuperficie', currentFilter: "INCLUDE", type: 'raster', legend: false, zIndex: 0, allowGetFeatureInfo: false },
     temperatura: { name: `${geoServerWorkspace}:temperatura`, title: 'Temperatura (LST)', imageryLayer: null, toggleId: 'toggleTemperatura', currentFilter: "INCLUDE", type: 'raster', legend: true, zIndex: 5, allowGetFeatureInfo: false },
     vegetacion: { name: `${geoServerWorkspace}:vegetacion`, title: 'Vegetación (NDVI)', imageryLayer: null, toggleId: 'toggleVegetacion', currentFilter: "INCLUDE", type: 'raster', legend: true, zIndex: 4, allowGetFeatureInfo: false },
     suelos: { name: `${geoServerWorkspace}:Uso de Suelo`, title: 'Uso de Suelo', imageryLayer: null, toggleId: 'toggleSuelos', currentFilter: "INCLUDE", type: 'raster', legend: true, zIndex: 3, allowGetFeatureInfo: false },
     departamento: { 
-        name: `${geoServerWorkspace}:departamento`, 
-        title: 'Departamentos', 
-        imageryLayer: null, 
-        toggleId: 'toggleDepartamento', 
-        filterField: 'adm1_es', 
-        currentFilter: "INCLUDE",
-        type: 'vector', 
-        legend: false, 
-        zIndex: 10, 
-        infoFormat: 'application/json',
-        allowGetFeatureInfo: true,
-        attributeAliases: {
-            'adm1_es':'Departamento',
-            'adm0_es':'País',
-            'area_sqkm':'Área (km²)'
-        },
-        attributesToHide:[
-            'adm1_ref', 'adm1_pcode', 'adm0_pcode', 'date',
-            'validon', 'shape_leng', 'shape_area',
-         ],
+        name: `${geoServerWorkspace}:departamento`, title: 'Departamentos', imageryLayer: null, toggleId: 'toggleDepartamento', filterField: 'adm1_es', currentFilter: "INCLUDE", type: 'vector', legend: false, zIndex: 10, infoFormat: 'application/json', allowGetFeatureInfo: true,
+        attributeAliases: { 'adm1_es':'Departamento', 'adm0_es':'País', 'area_sqkm':'Área (km²)' },
+        attributesToHide:['adm1_ref', 'adm1_pcode', 'adm0_pcode', 'date', 'validon', 'shape_leng', 'shape_area']
     },
     municipios: { 
-        name: `${geoServerWorkspace}:municipio`, 
-        title: 'Municipios', 
-        imageryLayer: null, 
-        toggleId: 'toggleMunicipios', 
-        filterField: 'adm2_es', 
-        currentFilter: "INCLUDE", 
-        type: 'vector', 
-        legend: false, 
-        zIndex: 11, 
-        infoFormat: 'application/json',
-        allowGetFeatureInfo: true,
-        attributeAliases: {
-            'adm2_es':'Municipio',
-            'adm1_es':'Departamento',
-            'adm0_es':'País',
-            'area_sqkm':'Área (km²)'
-        },
-        attributesToHide:[
-            'adm2_pcode', 'adm2_ref', 
-            'adm1_pcode', 'adm0_pcode', 'date',
-            'validon', 'shape_leng', 'shape_area',
-         ],
+        name: `${geoServerWorkspace}:municipio`, title: 'Municipios', imageryLayer: null, toggleId: 'toggleMunicipios', filterField: 'adm2_es', currentFilter: "INCLUDE", type: 'vector', legend: false, zIndex: 11, infoFormat: 'application/json', allowGetFeatureInfo: true,
+        attributeAliases: { 'adm2_es':'Municipio', 'adm1_es':'Departamento', 'adm0_es':'País', 'area_sqkm':'Área (km²)' },
+        attributesToHide:['adm2_pcode', 'adm2_ref', 'adm1_pcode', 'adm0_pcode', 'date', 'validon', 'shape_leng', 'shape_area']
     },
     distrito: { 
-        name: `${geoServerWorkspace}:distrito`, 
-        title: 'Distritos', 
-        imageryLayer: null, 
-        toggleId: 'toggleDistrito', 
-        filterField: 'adm3_es', 
-        currentFilter: "INCLUDE", 
-        type: 'vector', 
-        legend: false, 
-        zIndex: 12, 
-        infoFormat: 'application/json',
-        allowGetFeatureInfo: true,
-        attributeAliases: {
-            'adm3_es': 'Distrito',
-            'adm2_es':'Municipio',
-            'adm1_es':'Departamento',
-            'adm0_es':'País',
-            'area_sqkm':'Área (km²)'
-        },
-        attributesToHide:[
-            'adm3_pcode', 'adm3_ref', 'adm2_pcode', 
-            'adm1_pcode', 'adm0_pcode', 'date',
-            'validon', 'shape_leng', 'shape_area',
-         ],
+        name: `${geoServerWorkspace}:distrito`, title: 'Distritos', imageryLayer: null, toggleId: 'toggleDistrito', filterField: 'adm3_es', currentFilter: "INCLUDE", type: 'vector', legend: false, zIndex: 12, infoFormat: 'application/json', allowGetFeatureInfo: true,
+        attributeAliases: { 'adm3_es': 'Distrito', 'adm2_es':'Municipio', 'adm1_es':'Departamento', 'adm0_es':'País', 'area_sqkm':'Área (km²)' },
+        attributesToHide:['adm3_pcode', 'adm3_ref', 'adm2_pcode', 'adm1_pcode', 'adm0_pcode', 'date', 'validon', 'shape_leng', 'shape_area']
     },
     cuerposAgua: {
-        name: `${geoServerWorkspace}:cuerposAgua`, 
-        title: 'Cuerpos de Agua', 
-        imageryLayer: null,
-        toggleId: 'toggleCuerpos', 
-        currentFilter: "INCLUDE", 
-        type: 'vector', 
-        legend: true, 
-        zIndex: 13, 
-        infoFormat: 'application/json',
-        allowGetFeatureInfo: true,
-        attributeAliases: {
-            'fclass': 'Clase',
-            'name':'Nombre'
-        },
-        attributesToHide:[
-            'osm_id', 'code'
-         ],
+        name: `${geoServerWorkspace}:cuerposAgua`, title: 'Cuerpos de Agua', imageryLayer: null, toggleId: 'toggleCuerpos', currentFilter: "INCLUDE", type: 'vector', legend: true, zIndex: 13, infoFormat: 'application/json', allowGetFeatureInfo: true,
+        attributeAliases: { 'fclass': 'Clase', 'name':'Nombre' },
+        attributesToHide:['osm_id', 'code']
     },
     deburga: {
-        name: `${geoServerWorkspace}:deburga`,
-        title: 'DEGURBA',
-        imageryLayer: null,
-        toggleId: 'toggleDeburga',
-        filterField: 'class',
-        currentFilter: "INCLUDE",
-        type: 'vector',
-        legend: true,
-        zIndex: 14,
-        infoFormat: 'application/json',
-        allowGetFeatureInfo: true,
-        attributeAliases: {
-            'sum_person': 'Población Total',
-            'sum_hogare': 'Hogares Totales',
-            'sum_vivien': 'Viviendas Totales',
-            'class': 'Clasificación DEGURBA',
-            'nivel': 'Nivel DEGURBA',
-            'nombre_dep': 'Departamento',
-            'nombre_mun': 'Municipio',
-            'nombre_dis': 'Distrito',
-            'densidad': 'Densidad Poblacional (hab/km²)'
-        },
-        attributesToHide: [
-            'fid', 'objectid', 'cod', 'id_depto', 'id_mun', 'id_distrit',
-            'sum_area_k', 'objectid_1', 'select_dis', 'select_mun', 'select_dep',
-            'shape__are', 'shape__len'
-        ]
+        name: `${geoServerWorkspace}:deburga`, title: 'DEGURBA', imageryLayer: null, toggleId: 'toggleDeburga', filterField: 'class', currentFilter: "INCLUDE", type: 'vector', legend: true, zIndex: 14, infoFormat: 'application/json', allowGetFeatureInfo: true,
+        attributeAliases: { 'sum_person': 'Población Total', 'sum_hogare': 'Hogares Totales', 'sum_vivien': 'Viviendas Totales', 'class': 'Clasificación DEGURBA', 'nivel': 'Nivel DEGURBA', 'nombre_dep': 'Departamento', 'nombre_mun': 'Municipio', 'nombre_dis': 'Distrito', 'densidad': 'Densidad Poblacional (hab/km²)' },
+        attributesToHide: [ 'fid', 'objectid', 'cod', 'id_depto', 'id_mun', 'id_distrit', 'sum_area_k', 'objectid_1', 'select_dis', 'select_mun', 'select_dep', 'shape__are', 'shape__len' ]
     },
     construcciones: {
-        name: `${geoServerWorkspace}:construcciones`,
-        title: 'Construcciones',
-        imageryLayer: null,
-        toggleId: 'toggleConstrucciones',
-        currentFilter: "INCLUDE",
-        type: 'vector',
-        legend: false,
-        zIndex: 15,
-        infoFormat: 'application/json',
-        allowGetFeatureInfo: true,
-        attributeAliases: {
-            'osm_id': 'ID OSM',
-            'name': 'Nombre',
-            'type': 'Tipo', 
-            'code': 'Código',
-            'fclass': 'Clase Funcional',
-        }
+        name: `${geoServerWorkspace}:construcciones`, title: 'Construcciones', imageryLayer: null, toggleId: 'toggleConstrucciones', currentFilter: "INCLUDE", type: 'vector', legend: false, zIndex: 15, infoFormat: 'application/json', allowGetFeatureInfo: true,
+        attributeAliases: { 'osm_id': 'ID OSM', 'name': 'Nombre', 'type': 'Tipo', 'code': 'Código', 'fclass': 'Clase Funcional' }
     },
     rios: { name: `${geoServerWorkspace}:rios`, title: 'Ríos y vías de agua', imageryLayer: null, toggleId: 'toggleRios', currentFilter: "INCLUDE", type: 'vector', legend: true, zIndex: 16, allowGetFeatureInfo: true },
     carreteras: { name: `${geoServerWorkspace}:carreteras`, title: 'Carreteras', imageryLayer: null, toggleId: 'toggleCarreteras', currentFilter: "INCLUDE", type: 'vector', legend: false, zIndex: 17, allowGetFeatureInfo: true }
@@ -177,6 +93,15 @@ const cesiumLayersConfig = {
 
 let viewer;
 let screenSpaceEventHandler = null;
+
+// Función auxiliar para obtener los parámetros de la vista Home según el modo
+function getAppHomeViewParameters() {
+    if (viewer && viewer.scene.mode === Cesium.SceneMode.SCENE2D) {
+        return { destination: vistaHome2D_ElSalvador, duration: 1.5 };
+    } else { // SCENE3D o COLUMBUS_VIEW
+        return vistaHome3D_ElSalvador;
+    }
+}
 
 async function initializeCesiumApp() {
     let terrainProviderInstance;
@@ -205,37 +130,18 @@ async function initializeCesiumApp() {
         });
         console.log("Visor de CesiumJS inicializado.");
 
-        // Definir el rectángulo para El Salvador
-        const elSalvadorRectangle = Cesium.Rectangle.fromDegrees(
-            elSalvadorBoundingBox[0], 
-            elSalvadorBoundingBox[1], 
-            elSalvadorBoundingBox[2], 
-            elSalvadorBoundingBox[3]  
-        );
+        viewer.camera.flyTo(getAppHomeViewParameters());
 
-        // Volar a la vista de El Salvador al iniciar
-        viewer.camera.flyTo({
-            destination: elSalvadorRectangle,
-            duration: 2.0 // Duración de la animación en segundos
-        });
+        // Las restricciones de cámara están eliminadas según tu petición anterior
+        // viewer.camera.constrainedExtent = Cesium.Rectangle.fromDegrees(...); 
+        // viewer.scene.screenSpaceCameraController.minimumZoomDistance = ...; 
 
-        // Restringir la cámara a los límites de El Salvador
-        viewer.camera.constrainedExtent = elSalvadorRectangle;
-        viewer.scene.screenSpaceCameraController.minimumZoomDistance = 30000; // Ajusta según sea necesario (30km)
-        // Opcional: viewer.scene.screenSpaceCameraController.maximumZoomDistance = 1500000; // Ajusta según sea necesario (1500km)
-
-        // --- INICIO: MODIFICACIÓN DEL BOTÓN HOME ---
-        // Sobrescribir la acción del botón Home para que vuele a El Salvador
-        if (viewer.homeButton) { // Verificar que el botón Home exista
+        if (viewer.homeButton) { 
             viewer.homeButton.viewModel.command.beforeExecute.addEventListener(function(commandInfo) {
-                viewer.camera.flyTo({
-                    destination: elSalvadorRectangle,
-                    duration: 1.5 
-                });
-                commandInfo.cancel = true; // Cancelar la acción por defecto del botón Home
+                viewer.camera.flyTo(getAppHomeViewParameters());
+                commandInfo.cancel = true; 
             });
         }
-        // --- FIN: MODIFICACIÓN DEL BOTÓN HOME ---
 
     } catch (viewerError) {
         console.error("Error al inicializar el Cesium.Viewer:", viewerError);
@@ -254,7 +160,7 @@ async function initializeCesiumApp() {
         const imageryFeaturesPromise = viewer.imageryLayers.pickImageryLayerFeatures(ray, viewer.scene);
 
         if (!Cesium.defined(imageryFeaturesPromise)) {
-            if (viewer.selectedEntity && movement.position) { // Solo si hay posición de clic
+            if (viewer.selectedEntity && movement.position) { 
                 viewer.selectedEntity = undefined;
             }
             return;
@@ -654,14 +560,7 @@ function resetAllFilters() {
     updateAllVisibleLayersOrder();
 
     if (viewer) {
-        const elSalvadorRectangle = Cesium.Rectangle.fromDegrees(
-            elSalvadorBoundingBox[0], elSalvadorBoundingBox[1],
-            elSalvadorBoundingBox[2], elSalvadorBoundingBox[3]
-        );
-        viewer.camera.flyTo({
-            destination: elSalvadorRectangle,
-            duration: 1.5
-        });
+        viewer.camera.flyTo(getAppHomeViewParameters()); // Usar la función para vista Home dependiente del modo
     }
 }
 
