@@ -246,7 +246,7 @@
         }
 
         /* ---------- RESPONSIVE ADDITIONS ---------- */
-        @media (max-width: 768px) {
+        @media (max-width: 1280px) {
             .app-container {
                 padding: 0;
             }
@@ -287,6 +287,7 @@
             }
             #filter-bar select {
                 min-width: 120px;
+
             }
 
         }
@@ -296,7 +297,7 @@
 <body class="app-container">
     <!-- Botón de menú para pantallas pequeñas -->
     <button id="sidebarToggle"
-        class="fixed top-4 left-4 z-[1002] md:hidden p-2 bg-[#2c3e50] text-white rounded focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+        class="fixed top-4 left-4 z-[1002] xl:hidden p-2 bg-[#2c3e50] text-white rounded focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
         <i class="fas fa-bars"></i>
     </button>
 
@@ -556,7 +557,7 @@
 
             // Cierra la barra lateral si se redimensiona a un tamaño grande
             window.addEventListener('resize', function () {
-                if (window.innerWidth >= 768) {
+                if (window.innerWidth >= 1280) {
                     closeSidebar();
                 }
             });
