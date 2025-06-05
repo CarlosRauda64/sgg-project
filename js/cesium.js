@@ -309,14 +309,13 @@ function createWMSImageryProvider(layerName, cqlFilter = "INCLUDE", infoFormat =
 }
 
 /**
- * Actualiza el orden de todas las capas visibles en el visor Cesium.
- * Primero, identifica las capas que deben estar visibles según los checkboxes.
- * Luego, ordena estas capas por su 'zIndex' configurado.
- * Finalmente, remueve todas las capas gestionadas existentes y las vuelve a agregar en el nuevo orden.
+ * NUEVA FUNCIÓN: Actualiza el orden de todas las capas visibles en el visor Cesium
+ * de manera diferencial, sin remover y volver a crear todas las capas innecesariamente.
  */
 function updateAllVisibleLayersOrder() {
     if (!viewer) return;
 
+    // 1. Determinar cuáles capas deben mostrarse, con su filtro y zIndex actuales.
     const layersToShow = [];
     for (const key in cesiumLayersConfig) {
         const config = cesiumLayersConfig[key];
@@ -325,38 +324,67 @@ function updateAllVisibleLayersOrder() {
         if (toggleCheckbox && toggleCheckbox.checked) {
             layersToShow.push({
                 key: key,
-                name: config.name,
-                filter: config.currentFilter,
+                config: config,
                 zIndex: config.zIndex !== undefined ? config.zIndex : 0,
+                filter: config.currentFilter,
                 infoFormat: config.infoFormat,
                 allowGetFeatureInfo: config.allowGetFeatureInfo
             });
         }
     }
 
+    // 2. Ordenar según zIndex ascendente.
     layersToShow.sort((a, b) => a.zIndex - b.zIndex);
 
-    const imageryLayersCopy = [...viewer.imageryLayers._layers];
-    imageryLayersCopy.forEach(layerInstance => {
-        const managedKey = Object.keys(cesiumLayersConfig).find(key => cesiumLayersConfig[key].imageryLayer === layerInstance);
-        if (managedKey) {
-            viewer.imageryLayers.remove(layerInstance, true);
-            cesiumLayersConfig[managedKey].imageryLayer = null;
+    // 3. Procesar cada capa: si no existe o cambió su filtro, crear o actualizar; si existe, solo reordenar.
+    layersToShow.forEach(layerData => {
+        const { key, config, filter, infoFormat, allowGetFeatureInfo } = layerData;
+        let layer = config.imageryLayer;
+
+        // Verificar si ya existe y si el filtro cambió con respecto al último aplicado.
+        const previousFilter = config._lastFilter;
+        const filterChanged = previousFilter !== filter;
+
+        if (!layer || filterChanged) {
+            // Si ya existe esa capa, removerla para luego volver a crearla con el nuevo filtro.
+            if (layer) {
+                viewer.imageryLayers.remove(layer, true);
+            }
+            // Crear nuevo proveedor WMS con el filtro actualizado.
+            const provider = createWMSImageryProvider(
+                config.name,
+                filter,
+                infoFormat || 'text/html',
+                allowGetFeatureInfo !== undefined ? allowGetFeatureInfo : true
+            );
+            // Agregar la capa al viewer y guardar la referencia.
+            layer = viewer.imageryLayers.addImageryProvider(provider);
+            config.imageryLayer = layer;
+            // Registrar el filtro aplicado para comparaciones futuras.
+            config._lastFilter = filter;
+        }
+
+        // Reordenar la capa existente hacia el tope (más alto zIndex) en orden secuencial.
+        if (layer) {
+            viewer.imageryLayers.raiseToTop(layer);
         }
     });
 
-    layersToShow.forEach(layerData => {
-        const enablePicking = layerData.allowGetFeatureInfo === undefined ? true : layerData.allowGetFeatureInfo;
-        const provider = createWMSImageryProvider(
-            layerData.name,
-            layerData.filter,
-            layerData.infoFormat || 'text/html',
-            enablePicking
-        );
-        const cesiumLayer = viewer.imageryLayers.addImageryProvider(provider);
-        cesiumLayersConfig[layerData.key].imageryLayer = cesiumLayer;
-    });
+    // 4. Remover cualquier capa que ya no debe mostrarse (checkbox desmarcado).
+    for (const key in cesiumLayersConfig) {
+        if (!layersToShow.some(l => l.key === key)) {
+            const config = cesiumLayersConfig[key];
+            const existingLayer = config.imageryLayer;
+            if (existingLayer) {
+                viewer.imageryLayers.remove(existingLayer, true);
+                config.imageryLayer = null;
+                config._lastFilter = null;
+            }
+        }
+    }
 }
+
+// Fin de la NUEVA FUNCIÓN updateAllVisibleLayersOrder
 
 /**
  * Muestra la leyenda gráfica para una capa específica.
