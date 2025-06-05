@@ -156,7 +156,7 @@
         .cesium-viewer-toolbar {
             top: 20px !important;
             right: 15px !important;
-            z-index: 1001 !important;
+            z-index: 999 !important;
         }
 
         .cesium-viewer-animationContainer,
@@ -244,10 +244,65 @@
             font-weight: 600 !important;
             color: #f3f4f6 !important;
         }
+
+        /* ---------- RESPONSIVE ADDITIONS ---------- */
+        @media (max-width: 1280px) {
+            .app-container {
+                padding: 0;
+            }
+
+            #topbar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                height: 100vh;
+                margin: 0;
+                transform: translateX(-100%);
+                border-radius: 0;
+                transition: transform 0.3s ease-in-out;
+            }
+
+            #topbar.open {
+                transform: translateX(0);
+                z-index: 1000;
+            }
+
+            .map-area {
+                margin-left: 0;
+                height: auto;
+            }
+
+            .cesium-viewer-toolbar{
+                display: flex;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .cesium-viewer-toolbar span{
+                order: 3;
+            }
+            #filter-bar {
+                margin: 0 60px 0 50px;
+                justify-content: space-evenly;
+            }
+            #filter-bar select {
+                min-width: 120px;
+
+            }
+
+        }
     </style>
 </head>
 
 <body class="app-container">
+    <!-- Botón de menú para pantallas pequeñas -->
+    <button id="sidebarToggle"
+        class="fixed top-4 left-4 z-[1002] xl:hidden p-2 bg-[#2c3e50] text-white rounded focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Overlay para cuando la barra lateral esté abierta -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-[1000] hidden md:hidden"></div>
 
     <div id="topbar">
         <div id="logo-container" class="flex justify-center mb-3">
@@ -260,7 +315,8 @@
 
         <div class="flex-grow overflow-y-auto space-y-1 pr-1 custom-scrollbar">
             <div id="subtitulo-vectorial">
-                <h2 class="text-base font-semibold mb-1 text-gray-200 sticky top-0 bg-[#2c3e50] py-1 z-10">Capas Vectoriales</h2>
+                <h2 class="text-base font-semibold mb-1 text-gray-200 sticky top-0 bg-[#2c3e50] py-1 z-10">Capas
+                    Vectoriales</h2>
             </div>
             <div class="layer-group">
                 <div class="flex items-center justify-between">
@@ -471,6 +527,42 @@
     </div>
 
     <script src="js/cesium.js"></script>
+
+    <!-- Script para manejar el sidebar desplegable en dispositivos pequeños -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const sidebar = document.getElementById('topbar');
+            const toggleBtn = document.getElementById('sidebarToggle');
+            const overlay = document.getElementById('sidebar-overlay');
+
+            function openSidebar() {
+                sidebar.classList.add('open');
+                overlay.classList.remove('hidden');
+            }
+
+            function closeSidebar() {
+                sidebar.classList.remove('open');
+                overlay.classList.add('hidden');
+            }
+
+            toggleBtn.addEventListener('click', function () {
+                if (sidebar.classList.contains('open')) {
+                    closeSidebar();
+                } else {
+                    openSidebar();
+                }
+            });
+
+            overlay.addEventListener('click', closeSidebar);
+
+            // Cierra la barra lateral si se redimensiona a un tamaño grande
+            window.addEventListener('resize', function () {
+                if (window.innerWidth >= 1280) {
+                    closeSidebar();
+                }
+            });
+        });
+    </script>
 </body>
 
 </html>

@@ -4,7 +4,6 @@ const geoServerWorkspace = 'SGG';
 const geoServerWmsUrl = `https://geo.sggproject.me/geoserver/${geoServerWorkspace}/wms`;
 
 const elSalvadorBoundingBox = [-90.15, 13.10, -87.60, 14.50];
-
 const vistaHome2D_ElSalvador = Cesium.Rectangle.fromDegrees(
     elSalvadorBoundingBox[0],
     elSalvadorBoundingBox[1],
@@ -31,12 +30,54 @@ const vistaHome3D_ElSalvador = {
 };
 
 const divisionesAdministrativas = {
-    "Ahuachapán": { municipios: { "Ahuachapán Centro": ["Ahuachapán", "Apaneca", "Concepción de Ataco", "Tacuba"], "Ahuachapán Norte": ["Atiquizaya", "El Refugio", "San Lorenzo", "Turín"], "Ahuachapán Sur": ["Guaymango", "Jujutla", "San Francisco Menéndez", "San Pedro Puxtla"] } },
-    "Santa Ana": { municipios: { "Santa Ana Centro": ["Santa Ana"], "Santa Ana Este": ["Coatepeque", "El Congo"], "Santa Ana Norte": ["Masahuat", "Metapán", "Santa Rosa Guachipilín", "Texistepeque"], "Santa Ana Oeste": ["Candelaria de la Frontera", "Chalchuapa", "El Porvenir", "San Antonio Pajonal", "San Sebastián Salitrillo", "Santiago de la Frontera"] } },
-    "La Libertad": { municipios: { "La Libertad Centro": ["Ciudad Arce", "San Juan Opico"], "La Libertad Costa": ["Chiltiupán", "Jicalapa", "La Libertad", "Tamanique", "Teotepeque"], "La Libertad Este": ["Antiguo Cuscatlán", "Huizúcar", "Nuevo Cuscatlán", "San José Villanueva", "Zaragoza"], "La Libertad Norte": ["Quezaltepeque", "San Matías", "San Pablo Tacachico"], "La Libertad Oeste": ["Colón", "Jayaque", "Sacacoyo", "Talnique", "Tepecoyo"], "La Libertad Sur": ["Comasagua", "Santa Tecla"] } },
-    "San Salvador": { municipios: { "San Salvador Centro": ["Ayutuxtepeque", "Delgado", "Cuscatancingo", "Mejicanos", "San Salvador"], "San Salvador Este": ["Ilopango", "San Martín", "Soyapango", "Tonacatepeque"], "San Salvador Norte": ["Aguilares", "El Paisnal", "Guazapa"], "San Salvador Oeste": ["Apopa", "Nejapa"], "San Salvador Sur": ["Panchimalco", "Rosario de Mora", "San Marcos", "Santiago Texacuangos", "Santo Tomás"] } },
-    "Usulután": { municipios: { "Usulután Este": ["California", "Concepción Batres", "Ereguayquín", "Jucuarán", "Ozatlán", "San Dionisio", "Santa Elena", "Santa María", "Tecapán", "Usulután"], "Usulután Norte": ["Alegría", "Berlín", "El Triunfo", "Estanzuelas", "Jucuapa", "Mercedes Umaña", "Nueva Granada", "San Buenaventura", "Santiago de María"], "Usulután Oeste": ["Jiquilisco", "Puerto El Triunfo", "San Agustín", "San Francisco Javier"] } },
-    "San Miguel": { municipios: { "San Miguel Centro": ["Chirilagua", "Comacarán", "Moncagua", "Quelepa", "San Miguel", "Uluazapa"], "San Miguel Norte": ["Carolina", "Chapeltique", "Ciudad Barrios", "Nuevo Edén de San Juan", "San Antonio", "San Gerardo", "San Luis de la Reina", "Sesori"], "San Miguel Oeste": ["Chinameca", "El Tránsito", "Lolotique", "Nueva Guadalupe", "San Jorge", "San Rafael"] } }
+    "Ahuachapán": {
+        municipios: {
+            "Ahuachapán Centro": ["Ahuachapán", "Apaneca", "Concepción de Ataco", "Tacuba"],
+            "Ahuachapán Norte": ["Atiquizaya", "El Refugio", "San Lorenzo", "Turín"],
+            "Ahuachapán Sur": ["Guaymango", "Jujutla", "San Francisco Menéndez", "San Pedro Puxtla"]
+        }
+    },
+    "Santa Ana": {
+        municipios: {
+            "Santa Ana Centro": ["Santa Ana"],
+            "Santa Ana Este": ["Coatepeque", "El Congo"],
+            "Santa Ana Norte": ["Masahuat", "Metapán", "Santa Rosa Guachipilín", "Texistepeque"],
+            "Santa Ana Oeste": ["Candelaria de la Frontera", "Chalchuapa", "El Porvenir", "San Antonio Pajonal", "San Sebastián Salitrillo", "Santiago de la Frontera"]
+        }
+    },
+    "La Libertad": {
+        municipios: {
+            "La Libertad Centro": ["Ciudad Arce", "San Juan Opico"],
+            "La Libertad Costa": ["Chiltiupán", "Jicalapa", "La Libertad", "Tamanique", "Teotepeque"],
+            "La Libertad Este": ["Antiguo Cuscatlán", "Huizúcar", "Nuevo Cuscatlán", "San José Villanueva", "Zaragoza"],
+            "La Libertad Norte": ["Quezaltepeque", "San Matías", "San Pablo Tacachico"],
+            "La Libertad Oeste": ["Colón", "Jayaque", "Sacacoyo", "Talnique", "Tepecoyo"],
+            "La Libertad Sur": ["Comasagua", "Santa Tecla"]
+        }
+    },
+    "San Salvador": {
+        municipios: {
+            "San Salvador Centro": ["Ayutuxtepeque", "Delgado", "Cuscatancingo", "Mejicanos", "San Salvador"],
+            "San Salvador Este": ["Ilopango", "San Martín", "Soyapango", "Tonacatepeque"],
+            "San Salvador Norte": ["Aguilares", "El Paisnal", "Guazapa"],
+            "San Salvador Oeste": ["Apopa", "Nejapa"],
+            "San Salvador Sur": ["Panchimalco", "Rosario de Mora", "San Marcos", "Santiago Texacuangos", "Santo Tomás"]
+        }
+    },
+    "Usulután": {
+        municipios: {
+            "Usulután Este": ["California", "Concepción Batres", "Ereguayquín", "Jucuarán", "Ozatlán", "San Dionisio", "Santa Elena", "Santa María", "Tecapán", "Usulután"],
+            "Usulután Norte": ["Alegría", "Berlín", "El Triunfo", "Estanzuelas", "Jucuapa", "Mercedes Umaña", "Nueva Granada", "San Buenaventura", "Santiago de María"],
+            "Usulután Oeste": ["Jiquilisco", "Puerto El Triunfo", "San Agustín", "San Francisco Javier"]
+        }
+    },
+    "San Miguel": {
+        municipios: {
+            "San Miguel Centro": ["Chirilagua", "Comacarán", "Moncagua", "Quelepa", "San Miguel", "Uluazapa"],
+            "San Miguel Norte": ["Carolina", "Chapeltique", "Ciudad Barrios", "Nuevo Edén de San Juan", "San Antonio", "San Gerardo", "San Luis de la Reina", "Sesori"],
+            "San Miguel Oeste": ["Chinameca", "El Tránsito", "Lolotique", "Nueva Guadalupe", "San Jorge", "San Rafael"]
+        }
+    }
 };
 
 const departamentoSelectGlobal = document.getElementById('departamentoSelectGlobal');
@@ -53,31 +94,31 @@ const cesiumLayersConfig = {
     departamento: {
         name: `${geoServerWorkspace}:departamento`, title: 'Departamentos', imageryLayer: null, toggleId: 'toggleDepartamento', filterField: 'adm1_es', currentFilter: "INCLUDE", type: 'vector', legend: false, zIndex: 10, infoFormat: 'application/json', allowGetFeatureInfo: true,
         attributeAliases: { 'adm1_es':'Departamento', 'adm0_es':'País', 'area_sqkm':'Área (km²)' },
-        attributesToHide:['adm1_ref', 'adm1_pcode', 'adm0_pcode', 'date', 'validon', 'shape_leng', 'shape_area']
+        attributesToHide:['adm1_ref','adm1_pcode','adm0_pcode','date','validon','shape_leng','shape_area']
     },
     municipios: {
         name: `${geoServerWorkspace}:municipio`, title: 'Municipios', imageryLayer: null, toggleId: 'toggleMunicipios', filterField: 'adm2_es', currentFilter: "INCLUDE", type: 'vector', legend: false, zIndex: 11, infoFormat: 'application/json', allowGetFeatureInfo: true,
-        attributeAliases: { 'adm2_es':'Municipio', 'adm1_es':'Departamento', 'adm0_es':'País', 'area_sqkm':'Área (km²)' },
-        attributesToHide:['adm2_pcode', 'adm2_ref', 'adm1_pcode', 'adm0_pcode', 'date', 'validon', 'shape_leng', 'shape_area']
+        attributeAliases: { 'adm2_es':'Municipio','adm1_es':'Departamento','adm0_es':'País','area_sqkm':'Área (km²)' },
+        attributesToHide:['adm2_pcode','adm2_ref','adm1_pcode','adm0_pcode','date','validon','shape_leng','shape_area']
     },
     distrito: {
         name: `${geoServerWorkspace}:distrito`, title: 'Distritos', imageryLayer: null, toggleId: 'toggleDistrito', filterField: 'adm3_es', currentFilter: "INCLUDE", type: 'vector', legend: false, zIndex: 12, infoFormat: 'application/json', allowGetFeatureInfo: true,
-        attributeAliases: { 'adm3_es': 'Distrito', 'adm2_es':'Municipio', 'adm1_es':'Departamento', 'adm0_es':'País', 'area_sqkm':'Área (km²)' },
-        attributesToHide:['adm3_pcode', 'adm3_ref', 'adm2_pcode', 'adm1_pcode', 'adm0_pcode', 'date', 'validon', 'shape_leng', 'shape_area']
+        attributeAliases: { 'adm3_es':'Distrito','adm2_es':'Municipio','adm1_es':'Departamento','adm0_es':'País','area_sqkm':'Área (km²)' },
+        attributesToHide:['adm3_pcode','adm3_ref','adm2_pcode','adm1_pcode','adm0_pcode','date','validon','shape_leng','shape_area']
     },
     cuerposAgua: {
         name: `${geoServerWorkspace}:cuerposAgua`, title: 'Cuerpos de Agua', imageryLayer: null, toggleId: 'toggleCuerpos', currentFilter: "INCLUDE", type: 'vector', legend: true, zIndex: 13, infoFormat: 'application/json', allowGetFeatureInfo: true,
-        attributeAliases: { 'fclass': 'Clase', 'name':'Nombre' },
-        attributesToHide:['osm_id', 'code']
+        attributeAliases: { 'fclass':'Clase','name':'Nombre' },
+        attributesToHide:['osm_id','code']
     },
     deburga: {
         name: `${geoServerWorkspace}:deburga`, title: 'DEGURBA', imageryLayer: null, toggleId: 'toggleDeburga', filterField: 'class', currentFilter: "INCLUDE", type: 'vector', legend: true, zIndex: 14, infoFormat: 'application/json', allowGetFeatureInfo: true,
-        attributeAliases: { 'sum_person': 'Población Total', 'sum_hogare': 'Hogares Totales', 'sum_vivien': 'Viviendas Totales', 'class': 'Clasificación DEGURBA', 'nivel': 'Nivel DEGURBA', 'nombre_dep': 'Departamento', 'nombre_mun': 'Municipio', 'nombre_dis': 'Distrito', 'densidad': 'Densidad Poblacional (hab/km²)' },
-        attributesToHide: [ 'fid', 'objectid', 'cod', 'id_depto', 'id_mun', 'id_distrit', 'sum_area_k', 'objectid_1', 'select_dis', 'select_mun', 'select_dep', 'shape__are', 'shape__len' ]
+        attributeAliases: { 'sum_person':'Población Total','sum_hogare':'Hogares Totales','sum_vivien':'Viviendas Totales','class':'Clasificación DEGURBA','nivel':'Nivel DEGURBA','nombre_dep':'Departamento','nombre_mun':'Municipio','nombre_dis':'Distrito','densidad':'Densidad (hab/km²)' },
+        attributesToHide:[ 'fid','objectid','cod','id_depto','id_mun','id_distrit','sum_area_k','objectid_1','select_dis','select_mun','select_dep','shape__are','shape__len' ]
     },
     construcciones: {
         name: `${geoServerWorkspace}:construcciones`, title: 'Construcciones', imageryLayer: null, toggleId: 'toggleConstrucciones', currentFilter: "INCLUDE", type: 'vector', legend: false, zIndex: 15, infoFormat: 'application/json', allowGetFeatureInfo: true,
-        attributeAliases: { 'osm_id': 'ID OSM', 'name': 'Nombre', 'type': 'Tipo', 'code': 'Código', 'fclass': 'Clase Funcional' }
+        attributeAliases: { 'osm_id':'ID OSM','name':'Nombre','type':'Tipo','code':'Código','fclass':'Clase Funcional' }
     },
     rios: { name: `${geoServerWorkspace}:rios`, title: 'Ríos y vías de agua', imageryLayer: null, toggleId: 'toggleRios', currentFilter: "INCLUDE", type: 'vector', legend: false, zIndex: 16, allowGetFeatureInfo: true },
     carreteras: { name: `${geoServerWorkspace}:carreteras`, title: 'Carreteras', imageryLayer: null, toggleId: 'toggleCarreteras', currentFilter: "INCLUDE", type: 'vector', legend: false, zIndex: 17, allowGetFeatureInfo: true }
@@ -87,8 +128,7 @@ let viewer;
 let screenSpaceEventHandler = null;
 
 /**
- * Obtiene los parámetros de la vista Home (inicial) de la aplicación,
- * ajustándose si el visor está en modo 2D o 3D/Columbus View.
+ * Obtiene los parámetros de la vista Home (inicial) de la aplicación.
  * @returns {object} Objeto con 'destination' y 'duration' para la animación de la cámara.
  */
 function getAppHomeViewParameters() {
@@ -101,9 +141,6 @@ function getAppHomeViewParameters() {
 
 /**
  * Inicializa la aplicación CesiumJS.
- * Configura el proveedor de terreno, crea el visor Cesium,
- * establece la vista inicial de la cámara, personaliza el botón Home
- * y configura el manejador de eventos para la selección de características (InfoBox).
  */
 async function initializeCesiumApp() {
     let terrainProviderInstance;
@@ -176,11 +213,11 @@ async function initializeCesiumApp() {
                         );
                         const config = layerConfigKey ? cesiumLayersConfig[layerConfigKey] : null;
 
-                            if (config && config.allowGetFeatureInfo === false) {
-                                viewer.selectedEntity = undefined;
-                                customInfoBoxHandled = true;
-                                break;
-                            }
+                        if (config && config.allowGetFeatureInfo === false) {
+                            viewer.selectedEntity = undefined;
+                            customInfoBoxHandled = true;
+                            break;
+                        }
 
                         let layerTitle = config ? (config.title || feature.imageryLayer.imageryProvider.layers) : feature.imageryLayer.imageryProvider.layers;
                         let entityIdSuffix = Math.random().toString(36).substring(7);
@@ -194,8 +231,7 @@ async function initializeCesiumApp() {
                             viewer.selectedEntity = customEntity;
                             customInfoBoxHandled = true;
                             break;
-                        }
-                        else if (config && layerConfigKey === 'rios') {
+                        } else if (config && layerConfigKey === 'rios') {
                             const customEntity = new Cesium.Entity({
                                 id: `custom-${layerConfigKey}-infobox-entity`,
                                 name: layerTitle,
@@ -204,8 +240,7 @@ async function initializeCesiumApp() {
                             viewer.selectedEntity = customEntity;
                             customInfoBoxHandled = true;
                             break;
-                        }
-                        else if (config) {
+                        } else if (config) {
                             let descriptionHtml = '';
                             if (feature.properties && (config.attributeAliases || config.attributesToHide)) {
                                 descriptionHtml = '<table class="cesium-infoBox-defaultTable"><tbody>';
@@ -253,7 +288,7 @@ async function initializeCesiumApp() {
                                 }
                             } else if (feature.description) {
                                 descriptionHtml = feature.description;
-                                 if (feature.name) entityIdSuffix = feature.name.replace(/\W/g, '');
+                                if (feature.name) entityIdSuffix = feature.name.replace(/\W/g, '');
                             } else {
                                 descriptionHtml = '<div style="padding:10px;">Información no disponible.</div>';
                             }
@@ -283,7 +318,7 @@ async function initializeCesiumApp() {
 }
 
 /**
- * Crea y retorna un proveedor de imágenes WMS (WebMapServiceImageryProvider) de Cesium.
+ * Crea y retorna un proveedor de imágenes WMS de Cesium.
  * @param {string} layerName - El nombre de la capa en GeoServer (workspace:layer).
  * @param {string} [cqlFilter="INCLUDE"] - El filtro CQL a aplicar a la capa.
  * @param {string} [infoFormat='text/html'] - El formato para GetFeatureInfo.
@@ -298,7 +333,7 @@ function createWMSImageryProvider(layerName, cqlFilter = "INCLUDE", infoFormat =
             transparent: true,
             format: 'image/png',
             CQL_FILTER: cqlFilter,
-            VERSION: '1.1.1',
+            VERSION: '1.1.1'
         },
         getFeatureInfoParameters: {
             INFO_FORMAT: infoFormat,
@@ -310,9 +345,6 @@ function createWMSImageryProvider(layerName, cqlFilter = "INCLUDE", infoFormat =
 
 /**
  * Actualiza el orden de todas las capas visibles en el visor Cesium.
- * Primero, identifica las capas que deben estar visibles según los checkboxes.
- * Luego, ordena estas capas por su 'zIndex' configurado.
- * Finalmente, remueve todas las capas gestionadas existentes y las vuelve a agregar en el nuevo orden.
  */
 function updateAllVisibleLayersOrder() {
     if (!viewer) return;
@@ -321,13 +353,12 @@ function updateAllVisibleLayersOrder() {
     for (const key in cesiumLayersConfig) {
         const config = cesiumLayersConfig[key];
         const toggleCheckbox = document.getElementById(config.toggleId);
-
         if (toggleCheckbox && toggleCheckbox.checked) {
             layersToShow.push({
                 key: key,
-                name: config.name,
-                filter: config.currentFilter,
+                config: config,
                 zIndex: config.zIndex !== undefined ? config.zIndex : 0,
+                filter: config.currentFilter,
                 infoFormat: config.infoFormat,
                 allowGetFeatureInfo: config.allowGetFeatureInfo
             });
@@ -336,37 +367,52 @@ function updateAllVisibleLayersOrder() {
 
     layersToShow.sort((a, b) => a.zIndex - b.zIndex);
 
-    const imageryLayersCopy = [...viewer.imageryLayers._layers];
-    imageryLayersCopy.forEach(layerInstance => {
-        const managedKey = Object.keys(cesiumLayersConfig).find(key => cesiumLayersConfig[key].imageryLayer === layerInstance);
-        if (managedKey) {
-            viewer.imageryLayers.remove(layerInstance, true);
-            cesiumLayersConfig[managedKey].imageryLayer = null;
+    layersToShow.forEach(layerData => {
+        const { key, config, filter, infoFormat, allowGetFeatureInfo } = layerData;
+        let existingLayer = config.imageryLayer;
+        const lastFilter = config._lastFilter;
+        const filterChanged = lastFilter !== filter;
+
+        if (!existingLayer || filterChanged) {
+            if (existingLayer) {
+                viewer.imageryLayers.remove(existingLayer, true);
+            }
+            const provider = createWMSImageryProvider(
+                config.name,
+                filter,
+                infoFormat || 'text/html',
+                allowGetFeatureInfo !== undefined ? allowGetFeatureInfo : true
+            );
+            existingLayer = viewer.imageryLayers.addImageryProvider(provider);
+            config.imageryLayer = existingLayer;
+            config._lastFilter = filter;
+        }
+
+        if (existingLayer) {
+            viewer.imageryLayers.raiseToTop(existingLayer);
         }
     });
 
-    layersToShow.forEach(layerData => {
-        const enablePicking = layerData.allowGetFeatureInfo === undefined ? true : layerData.allowGetFeatureInfo;
-        const provider = createWMSImageryProvider(
-            layerData.name,
-            layerData.filter,
-            layerData.infoFormat || 'text/html',
-            enablePicking
-        );
-        const cesiumLayer = viewer.imageryLayers.addImageryProvider(provider);
-        cesiumLayersConfig[layerData.key].imageryLayer = cesiumLayer;
-    });
+    for (const key in cesiumLayersConfig) {
+        if (!layersToShow.some(l => l.key === key)) {
+            const config = cesiumLayersConfig[key];
+            const layerToRemove = config.imageryLayer;
+            if (layerToRemove) {
+                viewer.imageryLayers.remove(layerToRemove, true);
+                config.imageryLayer = null;
+                config._lastFilter = null;
+            }
+        }
+    }
 }
 
 /**
  * Muestra la leyenda gráfica para una capa específica.
- * Construye la URL para la solicitud GetLegendGraphic a GeoServer y la muestra en el div correspondiente.
  * @param {string} layerKey - La clave de la capa en `cesiumLayersConfig` para la cual mostrar la leyenda.
  */
 function displayIndividualLayerLegend(layerKey) {
     const config = cesiumLayersConfig[layerKey];
     const legendContentDiv = document.getElementById(`legend-content-${layerKey}`);
-
     if (!config || !legendContentDiv || !config.legend) {
         if (legendContentDiv) legendContentDiv.innerHTML = '';
         return;
@@ -374,17 +420,14 @@ function displayIndividualLayerLegend(layerKey) {
 
     legendContentDiv.innerHTML = '<p class="text-xs text-gray-400 italic">Cargando leyenda...</p>';
     const layerName = config.name;
-
     let legendOptionsArray = [
         "fontName:SansSerif", "fontSize:10", "fontAntiAliasing:true",
         "forceLabels:on", "labelMargin:2", "dx:0.2", "dy:0.2", "mx:0.2", "my:0.2",
         "border:false",
     ];
-
     const legendOptionsString = legendOptionsArray.join(';');
     const imageWidth = 120;
     const imageHeight = "";
-
     const legendUrl = `${geoServerWmsUrl}?REQUEST=GetLegendGraphic&VERSION=1.1.0&FORMAT=image/png&LAYER=${layerName}&STYLE=` +
         `&WIDTH=${imageWidth}` +
         (imageHeight ? `&HEIGHT=${imageHeight}` : '') +
@@ -393,7 +436,6 @@ function displayIndividualLayerLegend(layerKey) {
     const img = document.createElement('img');
     img.src = legendUrl;
     img.alt = `Leyenda ${config.title}`;
-
     img.onload = function () {
         legendContentDiv.innerHTML = '';
         legendContentDiv.appendChild(img);
@@ -406,8 +448,6 @@ function displayIndividualLayerLegend(layerKey) {
 
 /**
  * Configura los listeners de eventos para los controles de la interfaz de usuario.
- * Esto incluye los checkboxes para activar/desactivar capas, los botones de información de leyenda,
- * y los selectores de filtro globales (departamento, municipio, distrito, DEGURBA).
  */
 function setupEventListeners() {
     for (const key in cesiumLayersConfig) {
@@ -470,8 +510,6 @@ function setupEventListeners() {
 
 /**
  * Aplica la visibilidad inicial de las capas al cargar la aplicación.
- * Actualiza el orden de las capas visibles y ajusta la visualización de los botones de leyenda.
- * También maneja la lógica inicial para las capas ráster.
  */
 function applyInitialLayerVisibility() {
     updateAllVisibleLayersOrder();
@@ -488,7 +526,6 @@ function applyInitialLayerVisibility() {
 
 /**
  * Popula el selector de municipios basado en el departamento seleccionado.
- * Limpia y deshabilita el selector de distritos.
  * @param {string} departamentoNombre - El nombre del departamento seleccionado.
  */
 function populateMunicipioSelect(departamentoNombre) {
@@ -527,11 +564,13 @@ function populateMunicipioSelect(departamentoNombre) {
  */
 function populateDistritoSelect(departamentoNombre, municipioNombre) {
     distritoSelectGlobal.innerHTML = '<option value="">-- Seleccione --</option>';
-    if (departamentoNombre && municipioNombre &&
+    if (
+        departamentoNombre &&
+        municipioNombre &&
         divisionesAdministrativas[departamentoNombre] &&
         divisionesAdministrativas[departamentoNombre].municipios &&
-        divisionesAdministrativas[departamentoNombre].municipios[municipioNombre]) {
-
+        divisionesAdministrativas[departamentoNombre].municipios[municipioNombre]
+    ) {
         const distritos = divisionesAdministrativas[departamentoNombre].municipios[municipioNombre];
         distritos.forEach(distritoNombre => {
             const option = document.createElement('option');
@@ -549,9 +588,7 @@ function populateDistritoSelect(departamentoNombre, municipioNombre) {
 }
 
 /**
- * Aplica los filtros CQL a las capas correspondientes (departamento, municipios, distrito, DEGURBA)
- * basado en los valores seleccionados en los dropdowns globales.
- * Luego, actualiza el orden de las capas visibles.
+ * Aplica los filtros CQL a las capas correspondientes (departamento, municipios, distrito, DEGURBA).
  */
 function applyAllFilters() {
     const depSelected = departamentoSelectGlobal.value;
@@ -589,8 +626,6 @@ function applyAllFilters() {
 
 /**
  * Restablece todos los filtros a sus valores predeterminados.
- * Limpia los valores de los selectores de filtro, restablece los filtros CQL de las capas
- * a "INCLUDE", actualiza el orden de las capas y vuela la cámara a la vista inicial.
  */
 function resetAllFilters() {
     if (departamentoSelectGlobal) departamentoSelectGlobal.value = "";
@@ -615,64 +650,57 @@ const thematicRasterKeys = ['temperatura', 'vegetacion', 'suelos'];
 
 /**
  * Maneja la lógica de activación y desactivación de las capas ráster.
- * Asegura que solo una capa ráster temática (temperatura, vegetación, suelos) esté activa a la vez.
- * Si una capa temática se activa, también activa la capa base 'superficie' si no lo está.
- * Si se desactiva la capa 'superficie' mientras una temática está activa, previene la desactivación
- * o maneja la lógica para mantener la consistencia.
- * @param {string | null} changedLayerKey - La clave de la capa ráster que cambió su estado (o null en la inicialización).
- * @param {boolean} isChecked - El nuevo estado (marcado/desmarcado) del checkbox de la capa.
+ *  - Si se intenta activar "Superficie" sin que haya ninguna capa temática
+ *    activa, muestra un alert y no permite habilitarla.
+ *  - Cuando se activa una capa temática (temperatura, vegetación o suelos),
+ *    ya NO se activa automáticamente "Superficie".
+ *  - Si se desactiva la capa temática activa y no queda ninguna otra,
+ *    se desactiva "Superficie" si estaba activa.
  */
 function manejarActivacionRaster(changedLayerKey, isChecked) {
     const superficieConfig = cesiumLayersConfig.superficie;
     const superficieChk = document.getElementById(superficieConfig.toggleId);
-    let needsLayerReorder = false;
 
-    if (changedLayerKey && (thematicRasterKeys.includes(changedLayerKey) || changedLayerKey === 'superficie')) {
-        needsLayerReorder = true;
-
-        if (thematicRasterKeys.includes(changedLayerKey)) {
-            if (isChecked) {
-                activeRasterLayerKey = changedLayerKey;
-                thematicRasterKeys.forEach(key => {
-                    if (key !== changedLayerKey) {
-                        const chk = document.getElementById(cesiumLayersConfig[key].toggleId);
-                        if (chk && chk.checked) {
-                            chk.checked = false;
-                            const legendBtn = document.querySelector(`.legend-info-btn[data-layerkey="${key}"]`);
-                            const legendDiv = document.getElementById(`legend-content-${key}`);
-                            if (legendBtn) legendBtn.style.display = 'none';
-                            if (legendDiv) { legendDiv.style.display = 'none'; legendDiv.innerHTML = ''; }
-                            if (legendBtn) legendBtn.classList.remove('active');
-                        }
-                    }
-                });
-                if (superficieChk && !superficieChk.checked) {
-                    superficieChk.checked = true;
-                }
-            } else {
-                if (activeRasterLayerKey === changedLayerKey) {
-                    activeRasterLayerKey = null;
-                    const algunaOtraTematicaActiva = thematicRasterKeys.some(key => {
-                        const chk = document.getElementById(cesiumLayersConfig[key].toggleId);
-                        return chk && chk.checked;
-                    });
-                    if (!algunaOtraTematicaActiva && superficieChk && superficieChk.checked) {
-                        superficieChk.checked = false;
-                    }
-                }
-            }
-        } else if (changedLayerKey === 'superficie') {
-            if (!isChecked && activeRasterLayerKey) {
-                if (superficieChk) superficieChk.checked = true;
-                alert("La capa 'Superficie' es necesaria mientras una capa ráster temática esté activa.");
-                needsLayerReorder = false;
+    if (changedLayerKey === 'superficie') {
+        if (isChecked) {
+            const algunaTematicaActiva = thematicRasterKeys.some(key => {
+                const chk = document.getElementById(cesiumLayersConfig[key].toggleId);
+                return chk && chk.checked;
+            });
+            if (!algunaTematicaActiva) {
+                alert("Debe seleccionar primero una capa ráster temática (Temperatura, Vegetación o Suelos) antes de activar 'Superficie'.");
+                superficieChk.checked = false;
+                return;
             }
         }
     }
 
-    if (needsLayerReorder || changedLayerKey === null) {
-        updateAllVisibleLayersOrder();
+    if (thematicRasterKeys.includes(changedLayerKey)) {
+        if (isChecked) {
+            activeRasterLayerKey = changedLayerKey;
+            thematicRasterKeys.forEach(key => {
+                if (key !== changedLayerKey) {
+                    const chk = document.getElementById(cesiumLayersConfig[key].toggleId);
+                    if (chk && chk.checked) {
+                        chk.checked = false;
+                    }
+                }
+            });
+        } else {
+            if (activeRasterLayerKey === changedLayerKey) {
+                activeRasterLayerKey = null;
+                const otraTematicaActiva = thematicRasterKeys.some(key => {
+                    const chk = document.getElementById(cesiumLayersConfig[key].toggleId);
+                    return chk && chk.checked;
+                });
+                if (!otraTematicaActiva && superficieChk && superficieChk.checked) {
+                    superficieChk.checked = false;
+                }
+            }
+        }
     }
+
+    updateAllVisibleLayersOrder();
 }
 
 document.addEventListener('DOMContentLoaded', initializeCesiumApp);
