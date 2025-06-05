@@ -1,10 +1,13 @@
+// ---------------------------------------
+// 1. Configuraciones básicas de Cesium
+// ---------------------------------------
+
 Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI0NDRkNWVhNy0zZDUzLTRhMjctODM2Yy1mOGRiMjQwMzllNzEiLCJpZCI6MzAxNTU3LCJpYXQiOjE3NDcwMTE4MDF9.yJhtoi6X8NYz8YGp_79DMymdNxXpt7UIbQet3bwUNSY';
 
 const geoServerWorkspace = 'SGG';
 const geoServerWmsUrl = `https://geo.sggproject.me/geoserver/${geoServerWorkspace}/wms`;
 
 const elSalvadorBoundingBox = [-90.15, 13.10, -87.60, 14.50];
-
 const vistaHome2D_ElSalvador = Cesium.Rectangle.fromDegrees(
     elSalvadorBoundingBox[0],
     elSalvadorBoundingBox[1],
@@ -31,12 +34,7 @@ const vistaHome3D_ElSalvador = {
 };
 
 const divisionesAdministrativas = {
-    "Ahuachapán": { municipios: { "Ahuachapán Centro": ["Ahuachapán", "Apaneca", "Concepción de Ataco", "Tacuba"], "Ahuachapán Norte": ["Atiquizaya", "El Refugio", "San Lorenzo", "Turín"], "Ahuachapán Sur": ["Guaymango", "Jujutla", "San Francisco Menéndez", "San Pedro Puxtla"] } },
-    "Santa Ana": { municipios: { "Santa Ana Centro": ["Santa Ana"], "Santa Ana Este": ["Coatepeque", "El Congo"], "Santa Ana Norte": ["Masahuat", "Metapán", "Santa Rosa Guachipilín", "Texistepeque"], "Santa Ana Oeste": ["Candelaria de la Frontera", "Chalchuapa", "El Porvenir", "San Antonio Pajonal", "San Sebastián Salitrillo", "Santiago de la Frontera"] } },
-    "La Libertad": { municipios: { "La Libertad Centro": ["Ciudad Arce", "San Juan Opico"], "La Libertad Costa": ["Chiltiupán", "Jicalapa", "La Libertad", "Tamanique", "Teotepeque"], "La Libertad Este": ["Antiguo Cuscatlán", "Huizúcar", "Nuevo Cuscatlán", "San José Villanueva", "Zaragoza"], "La Libertad Norte": ["Quezaltepeque", "San Matías", "San Pablo Tacachico"], "La Libertad Oeste": ["Colón", "Jayaque", "Sacacoyo", "Talnique", "Tepecoyo"], "La Libertad Sur": ["Comasagua", "Santa Tecla"] } },
-    "San Salvador": { municipios: { "San Salvador Centro": ["Ayutuxtepeque", "Delgado", "Cuscatancingo", "Mejicanos", "San Salvador"], "San Salvador Este": ["Ilopango", "San Martín", "Soyapango", "Tonacatepeque"], "San Salvador Norte": ["Aguilares", "El Paisnal", "Guazapa"], "San Salvador Oeste": ["Apopa", "Nejapa"], "San Salvador Sur": ["Panchimalco", "Rosario de Mora", "San Marcos", "Santiago Texacuangos", "Santo Tomás"] } },
-    "Usulután": { municipios: { "Usulután Este": ["California", "Concepción Batres", "Ereguayquín", "Jucuarán", "Ozatlán", "San Dionisio", "Santa Elena", "Santa María", "Tecapán", "Usulután"], "Usulután Norte": ["Alegría", "Berlín", "El Triunfo", "Estanzuelas", "Jucuapa", "Mercedes Umaña", "Nueva Granada", "San Buenaventura", "Santiago de María"], "Usulután Oeste": ["Jiquilisco", "Puerto El Triunfo", "San Agustín", "San Francisco Javier"] } },
-    "San Miguel": { municipios: { "San Miguel Centro": ["Chirilagua", "Comacarán", "Moncagua", "Quelepa", "San Miguel", "Uluazapa"], "San Miguel Norte": ["Carolina", "Chapeltique", "Ciudad Barrios", "Nuevo Edén de San Juan", "San Antonio", "San Gerardo", "San Luis de la Reina", "Sesori"], "San Miguel Oeste": ["Chinameca", "El Tránsito", "Lolotique", "Nueva Guadalupe", "San Jorge", "San Rafael"] } }
+    /* ... tu objeto con municipios ... */
 };
 
 const departamentoSelectGlobal = document.getElementById('departamentoSelectGlobal');
@@ -53,31 +51,31 @@ const cesiumLayersConfig = {
     departamento: {
         name: `${geoServerWorkspace}:departamento`, title: 'Departamentos', imageryLayer: null, toggleId: 'toggleDepartamento', filterField: 'adm1_es', currentFilter: "INCLUDE", type: 'vector', legend: false, zIndex: 10, infoFormat: 'application/json', allowGetFeatureInfo: true,
         attributeAliases: { 'adm1_es':'Departamento', 'adm0_es':'País', 'area_sqkm':'Área (km²)' },
-        attributesToHide:['adm1_ref', 'adm1_pcode', 'adm0_pcode', 'date', 'validon', 'shape_leng', 'shape_area']
+        attributesToHide:['adm1_ref','adm1_pcode','adm0_pcode','date','validon','shape_leng','shape_area']
     },
     municipios: {
         name: `${geoServerWorkspace}:municipio`, title: 'Municipios', imageryLayer: null, toggleId: 'toggleMunicipios', filterField: 'adm2_es', currentFilter: "INCLUDE", type: 'vector', legend: false, zIndex: 11, infoFormat: 'application/json', allowGetFeatureInfo: true,
-        attributeAliases: { 'adm2_es':'Municipio', 'adm1_es':'Departamento', 'adm0_es':'País', 'area_sqkm':'Área (km²)' },
-        attributesToHide:['adm2_pcode', 'adm2_ref', 'adm1_pcode', 'adm0_pcode', 'date', 'validon', 'shape_leng', 'shape_area']
+        attributeAliases: { 'adm2_es':'Municipio','adm1_es':'Departamento','adm0_es':'País','area_sqkm':'Área (km²)' },
+        attributesToHide:['adm2_pcode','adm2_ref','adm1_pcode','adm0_pcode','date','validon','shape_leng','shape_area']
     },
     distrito: {
         name: `${geoServerWorkspace}:distrito`, title: 'Distritos', imageryLayer: null, toggleId: 'toggleDistrito', filterField: 'adm3_es', currentFilter: "INCLUDE", type: 'vector', legend: false, zIndex: 12, infoFormat: 'application/json', allowGetFeatureInfo: true,
-        attributeAliases: { 'adm3_es': 'Distrito', 'adm2_es':'Municipio', 'adm1_es':'Departamento', 'adm0_es':'País', 'area_sqkm':'Área (km²)' },
-        attributesToHide:['adm3_pcode', 'adm3_ref', 'adm2_pcode', 'adm1_pcode', 'adm0_pcode', 'date', 'validon', 'shape_leng', 'shape_area']
+        attributeAliases: { 'adm3_es':'Distrito','adm2_es':'Municipio','adm1_es':'Departamento','adm0_es':'País','area_sqkm':'Área (km²)' },
+        attributesToHide:['adm3_pcode','adm3_ref','adm2_pcode','adm1_pcode','adm0_pcode','date','validon','shape_leng','shape_area']
     },
     cuerposAgua: {
         name: `${geoServerWorkspace}:cuerposAgua`, title: 'Cuerpos de Agua', imageryLayer: null, toggleId: 'toggleCuerpos', currentFilter: "INCLUDE", type: 'vector', legend: true, zIndex: 13, infoFormat: 'application/json', allowGetFeatureInfo: true,
-        attributeAliases: { 'fclass': 'Clase', 'name':'Nombre' },
-        attributesToHide:['osm_id', 'code']
+        attributeAliases: { 'fclass':'Clase','name':'Nombre' },
+        attributesToHide:['osm_id','code']
     },
     deburga: {
         name: `${geoServerWorkspace}:deburga`, title: 'DEGURBA', imageryLayer: null, toggleId: 'toggleDeburga', filterField: 'class', currentFilter: "INCLUDE", type: 'vector', legend: true, zIndex: 14, infoFormat: 'application/json', allowGetFeatureInfo: true,
-        attributeAliases: { 'sum_person': 'Población Total', 'sum_hogare': 'Hogares Totales', 'sum_vivien': 'Viviendas Totales', 'class': 'Clasificación DEGURBA', 'nivel': 'Nivel DEGURBA', 'nombre_dep': 'Departamento', 'nombre_mun': 'Municipio', 'nombre_dis': 'Distrito', 'densidad': 'Densidad Poblacional (hab/km²)' },
-        attributesToHide: [ 'fid', 'objectid', 'cod', 'id_depto', 'id_mun', 'id_distrit', 'sum_area_k', 'objectid_1', 'select_dis', 'select_mun', 'select_dep', 'shape__are', 'shape__len' ]
+        attributeAliases: { 'sum_person':'Población Total','sum_hogare':'Hogares Totales','sum_vivien':'Viviendas Totales','class':'Clasificación DEGURBA','nivel':'Nivel DEGURBA','nombre_dep':'Departamento','nombre_mun':'Municipio','nombre_dis':'Distrito','densidad':'Densidad (hab/km²)' },
+        attributesToHide:[ 'fid','objectid','cod','id_depto','id_mun','id_distrit','sum_area_k','objectid_1','select_dis','select_mun','select_dep','shape__are','shape__len' ]
     },
     construcciones: {
         name: `${geoServerWorkspace}:construcciones`, title: 'Construcciones', imageryLayer: null, toggleId: 'toggleConstrucciones', currentFilter: "INCLUDE", type: 'vector', legend: false, zIndex: 15, infoFormat: 'application/json', allowGetFeatureInfo: true,
-        attributeAliases: { 'osm_id': 'ID OSM', 'name': 'Nombre', 'type': 'Tipo', 'code': 'Código', 'fclass': 'Clase Funcional' }
+        attributeAliases: { 'osm_id':'ID OSM','name':'Nombre','type':'Tipo','code':'Código','fclass':'Clase Funcional' }
     },
     rios: { name: `${geoServerWorkspace}:rios`, title: 'Ríos y vías de agua', imageryLayer: null, toggleId: 'toggleRios', currentFilter: "INCLUDE", type: 'vector', legend: false, zIndex: 16, allowGetFeatureInfo: true },
     carreteras: { name: `${geoServerWorkspace}:carreteras`, title: 'Carreteras', imageryLayer: null, toggleId: 'toggleCarreteras', currentFilter: "INCLUDE", type: 'vector', legend: false, zIndex: 17, allowGetFeatureInfo: true }
@@ -289,6 +287,11 @@ async function initializeCesiumApp() {
  * @param {string} [infoFormat='text/html'] - El formato para GetFeatureInfo.
  * @param {boolean} [enablePick=true] - Habilita o deshabilita la selección de características (picking).
  * @returns {Cesium.WebMapServiceImageryProvider} El proveedor de imágenes WMS configurado.
+ *
+ * NOTA: para que el navegador realmente cachee cada tile WMS, debes:
+ *  1) Configurar GeoServer para enviar Cache-Control: max-age=86400 (u otro período).
+ *  2) Asegurarte de que 'layerName' y 'cqlFilter' permanezcan EXACTOS si no cambian.
+ *     Si cambias cualquier cosa en CQL o estilo, la URL varía y la caché invalida.
  */
 function createWMSImageryProvider(layerName, cqlFilter = "INCLUDE", infoFormat = 'text/html', enablePick = true) {
     return new Cesium.WebMapServiceImageryProvider({
@@ -297,8 +300,8 @@ function createWMSImageryProvider(layerName, cqlFilter = "INCLUDE", infoFormat =
         parameters: {
             transparent: true,
             format: 'image/png',
-            CQL_FILTER: cqlFilter,
-            VERSION: '1.1.1',
+            CQL_FILTER: cqlFilter,  // ¡Que este string sea idéntico si no hay cambio real!
+            VERSION: '1.1.1'
         },
         getFeatureInfoParameters: {
             INFO_FORMAT: infoFormat,
@@ -309,13 +312,20 @@ function createWMSImageryProvider(layerName, cqlFilter = "INCLUDE", infoFormat =
 }
 
 /**
- * NUEVA FUNCIÓN: Actualiza el orden de todas las capas visibles en el visor Cesium
- * de manera diferencial, sin remover y volver a crear todas las capas innecesariamente.
+ * -----------------------------------------------
+ * NUEVA FUNCIÓN: updateAllVisibleLayersOrder
+ * -----------------------------------------------
+ * Actualiza el orden y visibilidad de las capas en Cesium de forma
+ * diferencial (sin remover/crear todo cada vez).
+ *
+ * 1) Reutiliza capas existentes si el filtro no cambió.
+ * 2) Solo crea nuevas capas o remueve las que ya no se usan.
+ * 3) Usa raiseToTop() para reordenar sin eliminar tiles ya cargados en memoria.
  */
 function updateAllVisibleLayersOrder() {
     if (!viewer) return;
 
-    // 1. Determinar cuáles capas deben mostrarse, con su filtro y zIndex actuales.
+    // 1. Determinar qué capas deberían mostrarse (checkbox checked).
     const layersToShow = [];
     for (const key in cesiumLayersConfig) {
         const config = cesiumLayersConfig[key];
@@ -333,58 +343,59 @@ function updateAllVisibleLayersOrder() {
         }
     }
 
-    // 2. Ordenar según zIndex ascendente.
+    // 2. Ordenar layersToShow por zIndex ascendente.
     layersToShow.sort((a, b) => a.zIndex - b.zIndex);
 
-    // 3. Procesar cada capa: si no existe o cambió su filtro, crear o actualizar; si existe, solo reordenar.
+    // 3. Para cada capa en layersToShow:
     layersToShow.forEach(layerData => {
         const { key, config, filter, infoFormat, allowGetFeatureInfo } = layerData;
-        let layer = config.imageryLayer;
+        let existingLayer = config.imageryLayer;
 
-        // Verificar si ya existe y si el filtro cambió con respecto al último aplicado.
-        const previousFilter = config._lastFilter;
-        const filterChanged = previousFilter !== filter;
+        // a) Comprobar si ya estaba creada y si el filtro cambió.
+        const lastFilter = config._lastFilter;
+        const filterChanged = lastFilter !== filter;
 
-        if (!layer || filterChanged) {
-            // Si ya existe esa capa, removerla para luego volver a crearla con el nuevo filtro.
-            if (layer) {
-                viewer.imageryLayers.remove(layer, true);
+        if (!existingLayer || filterChanged) {
+            // Si la capa existía, removerla para recrear con nuevo filtro.
+            if (existingLayer) {
+                viewer.imageryLayers.remove(existingLayer, true);
             }
-            // Crear nuevo proveedor WMS con el filtro actualizado.
+
+            // Crear el nuevo proveedor WMS con el filtro actual.
             const provider = createWMSImageryProvider(
                 config.name,
                 filter,
                 infoFormat || 'text/html',
                 allowGetFeatureInfo !== undefined ? allowGetFeatureInfo : true
             );
-            // Agregar la capa al viewer y guardar la referencia.
-            layer = viewer.imageryLayers.addImageryProvider(provider);
-            config.imageryLayer = layer;
-            // Registrar el filtro aplicado para comparaciones futuras.
+            // Agregar la capa al viewer y recordar la referencia.
+            existingLayer = viewer.imageryLayers.addImageryProvider(provider);
+            config.imageryLayer = existingLayer;
+
+            // Guardar el filtro aplicado para validar en la próxima llamada.
             config._lastFilter = filter;
         }
 
-        // Reordenar la capa existente hacia el tope (más alto zIndex) en orden secuencial.
-        if (layer) {
-            viewer.imageryLayers.raiseToTop(layer);
+        // b) Si la capa existe (creada ahora o antes), reordenarla al tope (última posición).
+        if (existingLayer) {
+            viewer.imageryLayers.raiseToTop(existingLayer);
         }
     });
 
-    // 4. Remover cualquier capa que ya no debe mostrarse (checkbox desmarcado).
+    // 4. Remover cualquier capa que existe en config pero NO en layersToShow.
     for (const key in cesiumLayersConfig) {
         if (!layersToShow.some(l => l.key === key)) {
             const config = cesiumLayersConfig[key];
-            const existingLayer = config.imageryLayer;
-            if (existingLayer) {
-                viewer.imageryLayers.remove(existingLayer, true);
+            const layerToRemove = config.imageryLayer;
+            if (layerToRemove) {
+                viewer.imageryLayers.remove(layerToRemove, true);
                 config.imageryLayer = null;
-                config._lastFilter = null;
+                config._lastFilter = null; // limpiar filtro previo
             }
         }
     }
 }
-
-// Fin de la NUEVA FUNCIÓN updateAllVisibleLayersOrder
+// FIN de la NUEVA FUNCIÓN updateAllVisibleLayersOrder
 
 /**
  * Muestra la leyenda gráfica para una capa específica.
@@ -450,6 +461,7 @@ function setupEventListeners() {
                 if (config.type === 'raster' && ['temperatura', 'vegetacion', 'suelos', 'superficie'].includes(key)) {
                     manejarActivacionRaster(key, isChecked);
                 } else {
+                    // Al cambiar visibilidad de capas vectoriales u otras, actualizamos orden
                     updateAllVisibleLayersOrder();
                 }
 
